@@ -98,7 +98,9 @@ const kompaktAktiv = computed(
 // Ausblenden: Rust meldet die Maus auch ohne Fokus (`maus`), die Ereignisse
 // im Fenster selbst reagieren sofort.
 const drueber = ref(true);
-const ausgeblendet = computed(() => kompaktAktiv.value && !!einstellungen.value?.kompakt_durchsichtig && !drueber.value);
+// Beim Ziehen der Breite ist die Maus oft außerhalb: dann nicht ausblenden.
+const zieht = ref(false);
+const ausgeblendet = computed(() => kompaktAktiv.value && !!einstellungen.value?.kompakt_durchsichtig && !drueber.value && !zieht.value);
 // Während der Regler in den Einstellungen gezogen wird, zeigt das ganze
 // Fenster die gewählte Deckkraft (ohne Übergang, damit es dem Regler folgt).
 const vorschauDeckkraft = ref<number | null>(null);
@@ -113,8 +115,8 @@ const mausRaus = () => (drueber.value = false);
 
 const BREITE = 360;
 const HOEHE = 560;
-// Kompakt: Breite in ganzen Kachelspalten (Kachel 112 px, Abstand 4 px; Innenrand
-// und Symbolspalte 40 px), am rechten Rand ziehbar; die Zeilen folgen daraus.
+// Kompakt: Breite in ganzen Kachelspalten (Kachel 112 px, Abstand 8 px; Innenrand
+// und Symbolspalte 60 px), am rechten Rand ziehbar; die Zeilen folgen daraus.
 // shortcut: Spaltenzahl nur in localStorage dieses Fensters, in einstellungen.json, falls sie mit umziehen soll.
 const SPALTEN_MIN = 1;
 const SPALTEN_MAX = 5;
@@ -127,7 +129,7 @@ function spaltenGemerkt(): number {
     }
 }
 const spalten = ref(spaltenGemerkt());
-const kompaktBreite = computed(() => 40 + spalten.value * 116 - 4);
+const kompaktBreite = computed(() => 60 + spalten.value * 120 - 8);
 function spaltenSetzen(n: number) {
     spalten.value = Math.min(SPALTEN_MAX, Math.max(SPALTEN_MIN, n));
     try {
@@ -219,7 +221,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div ref="rahmen" class="flex flex-col overflow-hidden motion-reduce:transition-none"
-        :class="[kompaktAktiv ? 'rounded-lg bg-flyout shadow-[inset_0_0_0_var(--haarlinie)_var(--flyout-rand)]' : 'h-full border border-border bg-background', vorschauDeckkraft === null ? 'transition-opacity duration-300 ease-out' : '']"
+        :class="[kompaktAktiv ? 'rounded-lg bg-flyout shadow-[inset_0_0_0_var(--haarlinie)_var(--muted-foreground)]' : 'h-full border border-border bg-background', vorschauDeckkraft === null ? 'transition-opacity duration-300 ease-out' : '']"
         :style="{ opacity: deckkraft }"
     >
         <template v-if="stand && einstellungen">
@@ -257,6 +259,7 @@ onBeforeUnmount(() => {
                 @fehler="zeigeFehler"
                 @gross="kompaktSetzen(false)"
                 @spalten="spaltenSetzen"
+                @ziehen="zieht = $event"
             />
             <Haupt
                 v-else-if="stand.auswahl"

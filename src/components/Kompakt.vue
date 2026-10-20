@@ -13,18 +13,19 @@ import { dauer, seit, useUhr } from '../zeit';
 // gezogen wird am grauen Rand (Optik wie die Flyouts von Windows 11).
 // Die Höhe folgt dem Inhalt (App.vue).
 const props = defineProps<{ auswahl: Auswahl; timer: Timer | null; offline: boolean; spalten: number }>();
-const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; gross: []; spalten: [anzahl: number] }>();
+const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; gross: []; spalten: [anzahl: number]; ziehen: [an: boolean] }>();
 
-// Griff am rechten Rand: Ziehen ändert die Spaltenzahl (je 116 px eine),
+// Griff am rechten Rand: Ziehen ändert die Spaltenzahl (je 120 px eine),
 // App.vue setzt daraus Breite und Höhe.
 let ziehenAb: { x: number; spalten: number } | null = null;
 function griffAn(e: PointerEvent) {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     ziehenAb = { x: e.screenX, spalten: props.spalten };
+    emit('ziehen', true);
 }
 function griffZiehen(e: PointerEvent) {
     if (ziehenAb) {
-        const neu = ziehenAb.spalten + Math.round((e.screenX - ziehenAb.x) / 116);
+        const neu = ziehenAb.spalten + Math.round((e.screenX - ziehenAb.x) / 120);
         if (neu !== props.spalten) {
             emit('spalten', neu);
         }
@@ -32,6 +33,7 @@ function griffZiehen(e: PointerEvent) {
 }
 function griffAus() {
     ziehenAb = null;
+    emit('ziehen', false);
 }
 
 const jetzt = useUhr();
@@ -74,6 +76,19 @@ const ohneKachel = computed(() => {
     return laufende.value.filter((l) => !gezeigt.has(l.eintrag.id));
 });
 
+// Schrift auf der Projektfarbe: schwarz oder weiß, je nachdem, was besser lesbar ist.
+function schriftAuf(farbe: string | undefined): string {
+    const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(farbe ?? '');
+    if (!m) {
+        return '#ffffff';
+    }
+    const [r, g, b] = m.slice(1).map((h) => {
+        const c = parseInt(h, 16) / 255;
+        return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.18 ? '#000000' : '#ffffff';
+}
+
 function titel(projekt: Projekt | null, taetigkeit: Taetigkeit | null): string {
     return [projekt?.client_name, projekt?.name, taetigkeit?.name].filter(Boolean).join(' · ');
 }
@@ -94,8 +109,8 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
 </script>
 
 <template>
-    <div data-tauri-drag-region class="relative flex cursor-default gap-1 p-1.5">
-        <div data-tauri-drag-region class="flex min-w-0 flex-1 flex-col gap-1">
+    <div data-tauri-drag-region class="relative flex cursor-default gap-2 p-3">
+        <div data-tauri-drag-region class="flex min-w-0 flex-1 flex-col gap-2">
             <div v-if="offline" role="status" class="px-0.5 text-[11px] leading-tight text-muted-foreground">
                 {{ t.laden.offline }}
             </div>
@@ -104,14 +119,15 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
             <div
                 v-for="l in ohneKachel"
                 :key="l.eintrag.id"
-                class="flex h-8 items-center gap-2 rounded-md bg-primary pr-1 pl-2.5 text-primary-foreground"
+                class="flex h-8 items-center gap-2 rounded-md pr-1 pl-2.5"
+                :style="{ background: l.projekt?.color ?? 'var(--primary)', color: schriftAuf(l.projekt?.color) }"
                 :title="titel(l.projekt, l.taetigkeit)"
             >
                 <span class="min-w-0 flex-1 truncate text-[12px]">{{ l.projekt?.name ?? `#${l.eintrag.project_id}` }}</span>
                 <span class="text-[12px] font-semibold tabular-nums">{{ dauer(seit(l.eintrag.started_at, jetzt)) }}</span>
                 <button
                     type="button"
-                    class="flex size-6 shrink-0 items-center justify-center rounded hover:bg-white/15"
+                    class="flex size-6 shrink-0 items-center justify-center rounded hover:bg-black/15"
                     :disabled="beschaeftigt"
                     :title="t.haupt.stoppen"
                     @click="aktion('stop', l.eintrag.project_id)"
@@ -120,18 +136,15 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
                 </button>
             </div>
 
-            <!-- Favoriten als Kacheln wie Windows 11: Name, darunter Farbe und Tätigkeit (oder Kunde), laufend in der Akzentfarbe mit Dauer. -->
-            <div v-if="kacheln.length > 0" data-tauri-drag-region class="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-1">
+            <!-- Favoriten als Kacheln wie Windows 11: Name, darunter Farbe und Tätigkeit (oder Kunde), laufend in der Projektfarbe mit Dauer. -->
+            <div v-if="kacheln.length > 0" data-tauri-drag-region class="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2">
                 <button
                     v-for="k in kacheln"
                     :key="k.schluessel"
                     type="button"
                     class="flex h-12 min-w-0 flex-col justify-center gap-0.5 rounded-md px-2.5 text-left"
-                    :class="
-                        k.lauf
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-kachel shadow-[inset_0_0_0_var(--haarlinie)_var(--kachel-rand)] hover:bg-kachel-hover active:text-foreground/70'
-                    "
+                    :class="k.lauf ? '' : 'bg-kachel shadow-[inset_0_0_0_var(--haarlinie)_var(--muted-foreground)] hover:bg-kachel-hover active:text-foreground/70'"
+                    :style="k.lauf ? { background: k.projekt.color, color: schriftAuf(k.projekt.color) } : undefined"
                     :disabled="beschaeftigt"
                     :title="`${titel(k.projekt, k.taetigkeit)} · ${k.lauf ? t.haupt.stoppen : t.haupt.starten}`"
                     @click="aktion(k.lauf ? 'stop' : 'start', k.projekt.id, k.taetigkeit?.id ?? null)"
@@ -148,18 +161,19 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
 
         <!-- Statt Kopfzeile: Schließen, volle Ansicht, im Browser öffnen. -->
         <div data-tauri-drag-region class="flex shrink-0 flex-col gap-0.5">
-            <button type="button" class="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.schliessen" @click="verbergen()">
-                <svg viewBox="0 0 16 16" class="size-2.5" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+            <!-- Symbole 16 px im 16er Raster, damit sie auf ganze Pixel fallen. -->
+            <button type="button" class="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.schliessen" @click="verbergen()">
+                <svg viewBox="0 0 16 16" class="size-4" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
             </button>
-            <button type="button" class="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.gross" @click="emit('gross')">
+            <button type="button" class="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.gross" @click="emit('gross')">
                 <!-- Vergrößern (Form wie lucide „maximize-2“). -->
-                <svg viewBox="0 0 24 24" class="size-2.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                <svg viewBox="0 0 16 16" class="size-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M10 2.5h3.5V6M6 13.5H2.5V10M13.5 2.5L9 7M2.5 13.5L7 9" />
                 </svg>
             </button>
-            <button type="button" class="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.oeffnen" @click="appOeffnen()">
-                <svg viewBox="0 0 16 16" class="size-2.5" aria-hidden="true">
-                    <path d="M9 3h4v4M13 3L7.5 8.5M11 9.5V13H3V5h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            <button type="button" class="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.oeffnen" @click="appOeffnen()">
+                <svg viewBox="0 0 16 16" class="size-4" aria-hidden="true">
+                    <path d="M9 3h4v4M13 3L7.5 8.5M11 9.5V13H3V5h3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </button>
         </div>
@@ -175,6 +189,7 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
             @pointermove="griffZiehen"
             @pointerup="griffAus"
             @pointercancel="griffAus"
+            @lostpointercapture="griffAus"
             @keydown.left.prevent="emit('spalten', spalten - 1)"
             @keydown.right.prevent="emit('spalten', spalten + 1)"
         />

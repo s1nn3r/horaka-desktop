@@ -18,10 +18,8 @@
     --ring: #0f6e63;
     /* Kompaktansicht in den Neutraltönen von Windows 11 (Flyout und Kacheln). */
     --flyout: #f3f3f3;
-    --flyout-rand: #000000;
     --kachel: #e9ebee;
     --kachel-hover: #f2f3f5;
-    --kachel-rand: #000000;
     color-scheme: light;
 }
 
@@ -41,10 +39,8 @@
         --destructive-foreground: #0d1512;
         --ring: #4fb3a4;
         --flyout: #272727;
-        --flyout-rand: rgba(255, 255, 255, 0.22);
         --kachel: #3a3a3a;
         --kachel-hover: #444444;
-        --kachel-rand: rgba(255, 255, 255, 0.2);
         color-scheme: dark;
     }
 }
@@ -62,10 +58,8 @@
     --destructive-foreground: #0d1512;
     --ring: #4fb3a4;
     --flyout: #272727;
-    --flyout-rand: rgba(255, 255, 255, 0.22);
     --kachel: #3a3a3a;
     --kachel-hover: #444444;
-    --kachel-rand: rgba(255, 255, 255, 0.2);
     color-scheme: dark;
 }
 
@@ -82,10 +76,8 @@
     --color-destructive-foreground: var(--destructive-foreground);
     --color-ring: var(--ring);
     --color-flyout: var(--flyout);
-    --color-flyout-rand: var(--flyout-rand);
     --color-kachel: var(--kachel);
     --color-kachel-hover: var(--kachel-hover);
-    --color-kachel-rand: var(--kachel-rand);
     --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -140,4 +132,14 @@ body {
 
 input {
     user-select: text;
+}
+
+/* Auswahlfelder mit eigenem Pfeil, damit er nicht am Rand klebt (Windows). */
+select {
+    appearance: none;
+    padding-right: 1.75rem !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%23858f8a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 0.875rem;
 }

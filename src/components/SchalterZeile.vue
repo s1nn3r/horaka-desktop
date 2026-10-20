@@ -5,7 +5,7 @@ const emit = defineEmits<{ aendern: [an: boolean] }>();
 </script>
 
 <template>
-    <label class="flex cursor-default items-center gap-3 px-3 py-2.5">
+    <label class="relative flex cursor-default items-center gap-3 px-3 py-2.5">
         <span class="min-w-0 flex-1">
             <span class="block text-[13px] font-medium">{{ titel }}</span>
             <span v-if="text" class="block text-[12px] leading-snug text-muted-foreground">{{ text }}</span>

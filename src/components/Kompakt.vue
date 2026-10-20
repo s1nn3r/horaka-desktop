@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { alsFehler, appOeffnen, ausloesen, verbergen } from '../befehle';
-import { sprache, t } from '../i18n';
+import { t } from '../i18n';
 import type { Aktion, Auswahl, Fehler, Kombination, Projekt, Stand, Taetigkeit, Timer } from '../typen';
 import { dauer, seit, useUhr } from '../zeit';
 
@@ -10,12 +10,12 @@ import { dauer, seit, useUhr } from '../zeit';
 // während ein Timer läuft. Die Kachel selbst startet und stoppt und zeigt,
 // ob sie läuft. Ein laufender Timer ohne eigene Kachel steht darüber als
 // schmale Zeile. Ohne Kopfzeile: Symbole rechts in einer schmalen Spalte,
-// gezogen wird am grauen Rand (Optik wie die Andock-Layouts von Windows 11).
+// gezogen wird am grauen Rand (Optik wie die Flyouts von Windows 11).
 // Die Höhe folgt dem Inhalt (App.vue).
 const props = defineProps<{ auswahl: Auswahl; timer: Timer | null; offline: boolean; spalten: number }>();
 const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; gross: []; spalten: [anzahl: number] }>();
 
-// Griff am rechten Rand: Ziehen ändert die Spaltenzahl (je 68 px eine),
+// Griff am rechten Rand: Ziehen ändert die Spaltenzahl (je 116 px eine),
 // App.vue setzt daraus Breite und Höhe.
 let ziehenAb: { x: number; spalten: number } | null = null;
 function griffAn(e: PointerEvent) {
@@ -24,7 +24,7 @@ function griffAn(e: PointerEvent) {
 }
 function griffZiehen(e: PointerEvent) {
     if (ziehenAb) {
-        const neu = ziehenAb.spalten + Math.round((e.screenX - ziehenAb.x) / 68);
+        const neu = ziehenAb.spalten + Math.round((e.screenX - ziehenAb.x) / 116);
         if (neu !== props.spalten) {
             emit('spalten', neu);
         }
@@ -104,15 +104,14 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
             <div
                 v-for="l in ohneKachel"
                 :key="l.eintrag.id"
-                class="flex h-7 items-center gap-1.5 rounded border border-primary bg-primary-tint pr-0.5 pl-2"
+                class="flex h-8 items-center gap-2 rounded-md bg-primary pr-1 pl-2.5 text-primary-foreground"
                 :title="titel(l.projekt, l.taetigkeit)"
             >
-                <span class="size-2 shrink-0 animate-pulse rounded-full" :style="{ background: l.projekt?.color ?? 'currentColor' }" />
-                <span class="min-w-0 flex-1 truncate text-[12px] font-medium">{{ l.projekt?.name ?? `#${l.eintrag.project_id}` }}</span>
-                <span class="font-mono text-[12px] font-semibold tabular-nums">{{ dauer(seit(l.eintrag.started_at, jetzt)) }}</span>
+                <span class="min-w-0 flex-1 truncate text-[12px]">{{ l.projekt?.name ?? `#${l.eintrag.project_id}` }}</span>
+                <span class="text-[12px] font-semibold tabular-nums">{{ dauer(seit(l.eintrag.started_at, jetzt)) }}</span>
                 <button
                     type="button"
-                    class="flex size-6 shrink-0 items-center justify-center rounded text-destructive hover:bg-foreground/10"
+                    class="flex size-6 shrink-0 items-center justify-center rounded hover:bg-white/15"
                     :disabled="beschaeftigt"
                     :title="t.haupt.stoppen"
                     @click="aktion('stop', l.eintrag.project_id)"
@@ -121,30 +120,27 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
                 </button>
             </div>
 
-            <!-- Favoriten als quadratische Kacheln, so viele nebeneinander wie passen. -->
-            <div v-if="kacheln.length > 0" data-tauri-drag-region class="grid grid-cols-[repeat(auto-fill,minmax(3.75rem,1fr))] gap-1">
+            <!-- Favoriten als Kacheln wie Windows 11: Name, darunter Farbe und Tätigkeit (oder Kunde), laufend in der Akzentfarbe mit Dauer. -->
+            <div v-if="kacheln.length > 0" data-tauri-drag-region class="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-1">
                 <button
                     v-for="k in kacheln"
                     :key="k.schluessel"
                     type="button"
-                    class="relative flex h-14 min-w-0 flex-col justify-between overflow-hidden rounded border p-1.5 text-left transition-colors motion-reduce:transition-none"
-                    :class="k.lauf ? 'border-primary bg-primary-tint' : 'border-foreground/20 bg-foreground/[0.06] hover:bg-background'"
+                    class="flex h-12 min-w-0 flex-col justify-center gap-0.5 rounded-md px-2.5 text-left"
+                    :class="
+                        k.lauf
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-kachel shadow-[inset_0_0_0_var(--haarlinie)_var(--kachel-rand)] hover:bg-kachel-hover active:text-foreground/70'
+                    "
                     :disabled="beschaeftigt"
                     :title="`${titel(k.projekt, k.taetigkeit)} · ${k.lauf ? t.haupt.stoppen : t.haupt.starten}`"
                     @click="aktion(k.lauf ? 'stop' : 'start', k.projekt.id, k.taetigkeit?.id ?? null)"
                 >
-                    <span class="line-clamp-2 text-[11px] leading-tight font-medium hyphens-auto break-words" :lang="sprache">{{ k.projekt.name }}</span>
-                    <!-- Zustand: Stopp-Zeichen, wenn sie läuft, sonst Start. -->
-                    <svg v-if="k.lauf" viewBox="0 0 16 16" class="absolute right-1 bottom-1 size-2.5 text-destructive" aria-hidden="true">
-                        <rect x="3" y="3" width="10" height="10" rx="2" fill="currentColor" />
-                    </svg>
-                    <svg v-else viewBox="0 0 16 16" class="absolute right-1 bottom-1 size-2.5 text-foreground/60" aria-hidden="true">
-                        <path d="M4.5 2.8v10.4L13 8z" fill="currentColor" />
-                    </svg>
-                    <span class="flex min-w-0 items-center gap-1 pr-3">
-                        <span class="size-1.5 shrink-0 rounded-full" :class="k.lauf ? 'animate-pulse' : ''" :style="{ background: k.projekt.color }" />
-                        <span v-if="k.lauf" class="font-mono text-[10px] font-semibold text-primary tabular-nums">{{ dauer(seit(k.lauf.eintrag.started_at, jetzt)) }}</span>
-                        <span v-else-if="k.taetigkeit" class="truncate text-[10px] leading-tight text-foreground/70">{{ k.taetigkeit.name }}</span>
+                    <span class="truncate text-[12px] leading-4">{{ k.projekt.name }}</span>
+                    <span v-if="k.lauf" class="text-[11px] leading-4 font-semibold tabular-nums opacity-90">{{ dauer(seit(k.lauf.eintrag.started_at, jetzt)) }}</span>
+                    <span v-else class="flex min-w-0 items-center gap-1.5 text-[11px] leading-4 text-muted-foreground">
+                        <span class="size-2 shrink-0 rounded-[2px]" :style="{ background: k.projekt.color }" />
+                        <span class="truncate">{{ k.taetigkeit?.name ?? k.projekt.client_name }}</span>
                     </span>
                 </button>
             </div>
@@ -152,16 +148,16 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
 
         <!-- Statt Kopfzeile: Schließen, volle Ansicht, im Browser öffnen. -->
         <div data-tauri-drag-region class="flex shrink-0 flex-col gap-0.5">
-            <button type="button" class="flex size-5 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.schliessen" @click="verbergen()">
+            <button type="button" class="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.schliessen" @click="verbergen()">
                 <svg viewBox="0 0 16 16" class="size-2.5" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
             </button>
-            <button type="button" class="flex size-5 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.gross" @click="emit('gross')">
+            <button type="button" class="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.gross" @click="emit('gross')">
                 <!-- Vergrößern (Form wie lucide „maximize-2“). -->
                 <svg viewBox="0 0 24 24" class="size-2.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
                 </svg>
             </button>
-            <button type="button" class="flex size-5 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.oeffnen" @click="appOeffnen()">
+            <button type="button" class="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.oeffnen" @click="appOeffnen()">
                 <svg viewBox="0 0 16 16" class="size-2.5" aria-hidden="true">
                     <path d="M9 3h4v4M13 3L7.5 8.5M11 9.5V13H3V5h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>

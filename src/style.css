@@ -16,6 +16,12 @@
     --destructive: #c0392b;
     --destructive-foreground: #ffffff;
     --ring: #0f6e63;
+    /* Kompaktansicht in den Neutraltönen von Windows 11 (Flyout und Kacheln). */
+    --flyout: #f3f3f3;
+    --flyout-rand: #000000;
+    --kachel: #e9ebee;
+    --kachel-hover: #f2f3f5;
+    --kachel-rand: #000000;
     color-scheme: light;
 }
 
@@ -34,6 +40,11 @@
         --destructive: #e06b5e;
         --destructive-foreground: #0d1512;
         --ring: #4fb3a4;
+        --flyout: #272727;
+        --flyout-rand: rgba(255, 255, 255, 0.22);
+        --kachel: #3a3a3a;
+        --kachel-hover: #444444;
+        --kachel-rand: rgba(255, 255, 255, 0.2);
         color-scheme: dark;
     }
 }
@@ -50,6 +61,11 @@
     --destructive: #e06b5e;
     --destructive-foreground: #0d1512;
     --ring: #4fb3a4;
+    --flyout: #272727;
+    --flyout-rand: rgba(255, 255, 255, 0.22);
+    --kachel: #3a3a3a;
+    --kachel-hover: #444444;
+    --kachel-rand: rgba(255, 255, 255, 0.2);
     color-scheme: dark;
 }
 
@@ -65,7 +81,38 @@
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
     --color-ring: var(--ring);
+    --color-flyout: var(--flyout);
+    --color-flyout-rand: var(--flyout-rand);
+    --color-kachel: var(--kachel);
+    --color-kachel-hover: var(--kachel-hover);
+    --color-kachel-rand: var(--kachel-rand);
     --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Haarlinie wie in Windows 11: immer genau ein Gerätepixel, auch bei 125 bis 300 % Skalierung.
+   Nur als innerer Schatten nutzen, Rahmen rundet Chromium auf 1 CSS-Pixel auf. */
+:root {
+    --haarlinie: 1px;
+}
+@media (min-resolution: 1.25dppx) {
+    :root {
+        --haarlinie: 0.8px;
+    }
+}
+@media (min-resolution: 1.5dppx) {
+    :root {
+        --haarlinie: 0.67px;
+    }
+}
+@media (min-resolution: 2dppx) {
+    :root {
+        --haarlinie: 0.5px;
+    }
+}
+@media (min-resolution: 3dppx) {
+    :root {
+        --haarlinie: 0.34px;
+    }
 }
 
 html,

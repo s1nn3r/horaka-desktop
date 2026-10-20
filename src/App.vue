@@ -113,21 +113,21 @@ const mausRaus = () => (drueber.value = false);
 
 const BREITE = 360;
 const HOEHE = 560;
-// Kompakt: Breite in ganzen Kachelspalten (Kachel 64 px, Abstand 4 px, Rand
-// und Symbolspalte 36 px), am rechten Rand ziehbar; die Zeilen folgen daraus.
+// Kompakt: Breite in ganzen Kachelspalten (Kachel 112 px, Abstand 4 px; Innenrand
+// und Symbolspalte 40 px), am rechten Rand ziehbar; die Zeilen folgen daraus.
 // shortcut: Spaltenzahl nur in localStorage dieses Fensters, in einstellungen.json, falls sie mit umziehen soll.
-const SPALTEN_MIN = 2;
-const SPALTEN_MAX = 10;
+const SPALTEN_MIN = 1;
+const SPALTEN_MAX = 5;
 function spaltenGemerkt(): number {
     try {
         const n = Number(localStorage.getItem('kompakt-spalten'));
-        return n >= SPALTEN_MIN && n <= SPALTEN_MAX ? n : 3;
+        return n >= SPALTEN_MIN && n <= SPALTEN_MAX ? n : 2;
     } catch {
-        return 3;
+        return 2;
     }
 }
 const spalten = ref(spaltenGemerkt());
-const kompaktBreite = computed(() => 36 + spalten.value * 68 - 4);
+const kompaktBreite = computed(() => 40 + spalten.value * 116 - 4);
 function spaltenSetzen(n: number) {
     spalten.value = Math.min(SPALTEN_MAX, Math.max(SPALTEN_MIN, n));
     try {
@@ -219,7 +219,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div ref="rahmen" class="flex flex-col overflow-hidden motion-reduce:transition-none"
-        :class="[kompaktAktiv ? 'rounded-lg bg-muted' : 'h-full border border-border bg-background', vorschauDeckkraft === null ? 'transition-opacity duration-300 ease-out' : '']"
+        :class="[kompaktAktiv ? 'rounded-lg bg-flyout shadow-[inset_0_0_0_var(--haarlinie)_var(--flyout-rand)]' : 'h-full border border-border bg-background', vorschauDeckkraft === null ? 'transition-opacity duration-300 ease-out' : '']"
         :style="{ opacity: deckkraft }"
     >
         <template v-if="stand && einstellungen">

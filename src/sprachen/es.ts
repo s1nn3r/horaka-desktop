@@ -72,7 +72,7 @@ export const es: Texte = {
         version: 'Versión',
         thema: 'Apariencia',
         themen: {
-            system: 'Como el sistema',
+        system: 'Como el sistema',
             hell: 'Claro',
             dunkel: 'Oscuro',
         },
@@ -112,6 +112,9 @@ export const es: Texte = {
         kompaktText: 'Una ventana pequeña con los temporizadores en marcha que permanece abierta, también al hacer clic fuera y tras reiniciar.',
         durchsichtig: 'Atenuar cuando el ratón está en otro sitio',
         durchsichtigText: 'La ventana pequeña se vuelve transparente y reaparece en cuanto pasas el ratón por encima.',
+        kuerzelReiter: 'Atajos',
+        allgemein: 'General',
+        system: 'Sistema',
         deckkraft: 'Opacidad al atenuarse',
     },
     update: {

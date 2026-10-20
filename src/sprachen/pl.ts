@@ -72,7 +72,7 @@ export const pl: Texte = {
         version: 'Wersja',
         thema: 'Wygląd',
         themen: {
-            system: 'Jak w systemie',
+        system: 'Jak w systemie',
             hell: 'Jasny',
             dunkel: 'Ciemny',
         },
@@ -112,6 +112,9 @@ export const pl: Texte = {
         kompaktText: 'Małe okno z uruchomionymi stoperami, które pozostaje otwarte, także po kliknięciu obok i po ponownym uruchomieniu.',
         durchsichtig: 'Przygaś, gdy kursor jest gdzie indziej',
         durchsichtigText: 'Małe okno staje się przezroczyste i wraca, gdy tylko najedziesz na nie kursorem.',
+        kuerzelReiter: 'Skróty',
+        allgemein: 'Ogólne',
+        system: 'System',
         deckkraft: 'Krycie po przygaszeniu',
     },
     update: {

@@ -72,7 +72,7 @@ export const pt: Texte = {
         version: 'Versão',
         thema: 'Aspeto',
         themen: {
-            system: 'Como o sistema',
+        system: 'Como o sistema',
             hell: 'Claro',
             dunkel: 'Escuro',
         },
@@ -112,6 +112,9 @@ export const pt: Texte = {
         kompaktText: 'Uma janela pequena com os cronómetros em curso, que fica aberta, mesmo quando clicas noutro sítio e após reiniciar.',
         durchsichtig: 'Esbater quando o rato está noutro sítio',
         durchsichtigText: 'A janela pequena fica transparente e volta a aparecer assim que passas o rato por cima.',
+        kuerzelReiter: 'Atalhos',
+        allgemein: 'Geral',
+        system: 'Sistema',
         deckkraft: 'Opacidade ao esbater',
     },
     update: {

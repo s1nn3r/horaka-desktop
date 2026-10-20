@@ -72,7 +72,7 @@ export const fr: Texte = {
         version: 'Version',
         thema: 'Apparence',
         themen: {
-            system: 'Comme le système',
+        system: 'Comme le système',
             hell: 'Clair',
             dunkel: 'Sombre',
         },
@@ -112,6 +112,9 @@ export const fr: Texte = {
         kompaktText: 'Une petite fenêtre avec les chronomètres en cours, qui reste ouverte, même quand tu cliques ailleurs et après un redémarrage.',
         durchsichtig: 'Estomper quand la souris est ailleurs',
         durchsichtigText: 'La petite fenêtre devient transparente et réapparaît dès que tu passes la souris dessus.',
+        kuerzelReiter: 'Raccourcis',
+        allgemein: 'Général',
+        system: 'Système',
         deckkraft: 'Opacité quand estompée',
     },
     update: {

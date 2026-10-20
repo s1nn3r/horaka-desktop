@@ -72,7 +72,7 @@ export const nl: Texte = {
         version: 'Versie',
         thema: 'Weergave',
         themen: {
-            system: 'Zoals het systeem',
+        system: 'Zoals het systeem',
             hell: 'Licht',
             dunkel: 'Donker',
         },
@@ -112,6 +112,9 @@ export const nl: Texte = {
         kompaktText: 'Een klein venster met de lopende timers dat open blijft, ook als je ergens anders klikt en na een herstart.',
         durchsichtig: 'Vervagen als de muis ergens anders is',
         durchsichtigText: 'Het kleine venster wordt doorzichtig en komt terug zodra je er met de muis overheen gaat.',
+        kuerzelReiter: 'Sneltoetsen',
+        allgemein: 'Algemeen',
+        system: 'Systeem',
         deckkraft: 'Dekking bij vervagen',
     },
     update: {

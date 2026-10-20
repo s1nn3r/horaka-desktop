@@ -117,6 +117,9 @@ const de = {
         kompaktText: 'Kleines Fenster mit den laufenden Timern, das offen bleibt, auch beim Wegklicken und nach einem Neustart.',
         durchsichtig: 'Ausblenden, wenn die Maus nicht darüber ist',
         durchsichtigText: 'Das kleine Fenster wird durchsichtig und erscheint wieder, sobald du mit der Maus darüberfährst.',
+        allgemein: 'Allgemein',
+        kuerzelReiter: 'Kürzel',
+        system: 'System',
         deckkraft: 'Deckkraft beim Ausblenden',
     },
     update: {
@@ -263,6 +266,9 @@ const en: Texte = {
         kompaktText: 'A small window with the running timers that stays open, even when you click elsewhere and after a restart.',
         durchsichtig: 'Fade out when the mouse is elsewhere',
         durchsichtigText: 'The small window turns see-through and comes back as soon as you move the mouse over it.',
+        allgemein: 'General',
+        kuerzelReiter: 'Shortcuts',
+        system: 'System',
         deckkraft: 'Opacity when faded',
     },
     update: {

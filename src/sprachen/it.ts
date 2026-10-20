@@ -72,7 +72,7 @@ export const it: Texte = {
         version: 'Versione',
         thema: 'Aspetto',
         themen: {
-            system: 'Come il sistema',
+        system: 'Come il sistema',
             hell: 'Chiaro',
             dunkel: 'Scuro',
         },
@@ -112,6 +112,9 @@ export const it: Texte = {
         kompaktText: 'Una piccola finestra con i timer in corso che resta aperta, anche quando clicchi altrove e dopo un riavvio.',
         durchsichtig: 'Sfuma quando il mouse è altrove',
         durchsichtigText: 'La piccola finestra diventa trasparente e riappare appena ci passi sopra con il mouse.',
+        kuerzelReiter: 'Scorciatoie',
+        allgemein: 'Generale',
+        system: 'Sistema',
         deckkraft: 'Opacità quando sfumata',
     },
     update: {

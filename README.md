@@ -48,6 +48,8 @@ Global shortcuts work while Horaka Desktop is in the background. You can assign 
 
 ### Settings
 
+Three tabs with grouped switches: General, Shortcuts and System.
+
 - Appearance: light, dark or like the system
 - Language: English, German, French, Spanish, Italian, Dutch, Polish or Portuguese, or like the system
 - Compact view, fading and opacity
@@ -59,8 +61,8 @@ Global shortcuts work while Horaka Desktop is in the background. You can assign 
 - Disconnect
 
 <p>
-  <img src="docs/screenshots/settings-light.png" width="270" alt="Settings: appearance, language, compact view and notes">
-  <img src="docs/screenshots/shortcuts-light.png" width="270" alt="Settings: shortcuts, updates and autostart">
+  <img src="docs/screenshots/settings-light.png" width="270" alt="Settings, General tab: appearance, language, compact view and notes">
+  <img src="docs/screenshots/shortcuts-light.png" width="270" alt="Settings, Shortcuts tab">
 </p>
 
 ### Sync and updates

@@ -7,7 +7,7 @@
 use crate::api::{Auswahl, Timer};
 use crate::texte::Texte;
 use tauri::image::Image;
-use tauri::menu::{Menu, MenuBuilder, MenuItem};
+use tauri::menu::{Menu, MenuBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Wry};
 
@@ -28,6 +28,42 @@ fn symbol(laeuft: bool) -> Image<'static> {
     };
     Image::from_bytes(bytes).expect("Tray-Symbol")
 }
+
+// Windows hält im Menü links eine Spalte für Symbole frei: dort stehen
+// die Symbole der App (Quellen assets/menu-*.svg, 32 px nach
+// icons/menu). macOS hat diese Spalte nicht und bleibt bei reinem Text mit
+// ▶ und ● vor Favoriten und laufenden Timern.
+#[cfg(windows)]
+fn eintrag(
+    app: &AppHandle,
+    id: impl Into<tauri::menu::MenuId>,
+    text: impl AsRef<str>,
+    an: bool,
+    bild: &'static [u8],
+) -> tauri::Result<tauri::menu::IconMenuItem<Wry>> {
+    tauri::menu::IconMenuItem::with_id(
+        app,
+        id,
+        text,
+        an,
+        Image::from_bytes(bild).ok(),
+        None::<&str>,
+    )
+}
+
+#[cfg(not(windows))]
+fn eintrag(
+    app: &AppHandle,
+    id: impl Into<tauri::menu::MenuId>,
+    text: impl AsRef<str>,
+    an: bool,
+    _bild: &'static [u8],
+) -> tauri::Result<tauri::menu::MenuItem<Wry>> {
+    tauri::menu::MenuItem::with_id(app, id, text, an, None::<&str>)
+}
+
+const VOR_START: &str = if cfg!(windows) { "" } else { "▶ " };
+const VOR_LAUFEND: &str = if cfg!(windows) { "" } else { "● " };
 
 pub fn einrichten(app: &AppHandle) -> tauri::Result<()> {
     let menu = menu_bauen(app, None, None)?;
@@ -124,25 +160,25 @@ fn menu_bauen(
         if timer.running {
             for e in &timer.entries {
                 let text = format!(
-                    "● {} ({})",
+                    "{VOR_LAUFEND}{} ({})",
                     auswahl.bezeichnung(e.project_id, e.activity_id),
                     dauer(seit(&e.started_at))
                 );
-                menu = menu.item(&MenuItem::with_id(
+                menu = menu.item(&eintrag(
                     app,
                     format!("laufend:{}", e.id),
                     text,
                     false,
-                    None::<&str>,
+                    include_bytes!("../icons/tray/win-laeuft.png"),
                 )?);
             }
             menu = menu
-                .item(&MenuItem::with_id(
+                .item(&eintrag(
                     app,
                     "stop",
                     t.alle_stoppen,
                     true,
-                    None::<&str>,
+                    include_bytes!("../icons/menu/stopp.png"),
                 )?)
                 .separator();
         }
@@ -157,42 +193,51 @@ fn menu_bauen(
             }
             gesehen.push(schluessel);
             let id = format!("start:{}:{}", k.project_id, k.activity_id.unwrap_or(0));
-            let text = format!("▶ {}", auswahl.bezeichnung(k.project_id, k.activity_id));
-            menu = menu.item(&MenuItem::with_id(app, id, text, true, None::<&str>)?);
+            let text = format!(
+                "{VOR_START}{}",
+                auswahl.bezeichnung(k.project_id, k.activity_id)
+            );
+            menu = menu.item(&eintrag(
+                app,
+                id,
+                text,
+                true,
+                include_bytes!("../icons/menu/start.png"),
+            )?);
         }
         if !gesehen.is_empty() {
             menu = menu.separator();
         }
     }
 
-    menu.item(&MenuItem::with_id(
+    menu.item(&eintrag(
         app,
         "zeigen",
         t.fenster_oeffnen,
         true,
-        None::<&str>,
+        include_bytes!("../icons/menu/fenster.png"),
     )?)
-    .item(&MenuItem::with_id(
+    .item(&eintrag(
         app,
         "einstellungen",
         t.einstellungen,
         true,
-        None::<&str>,
+        include_bytes!("../icons/menu/einstellungen.png"),
     )?)
-    .item(&MenuItem::with_id(
+    .item(&eintrag(
         app,
         "app",
         t.im_browser,
         true,
-        None::<&str>,
+        include_bytes!("../icons/menu/browser.png"),
     )?)
     .separator()
-    .item(&MenuItem::with_id(
+    .item(&eintrag(
         app,
         "beenden",
         t.beenden,
         true,
-        None::<&str>,
+        include_bytes!("../icons/menu/beenden.png"),
     )?)
     .build()
 }

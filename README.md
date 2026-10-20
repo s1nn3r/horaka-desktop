@@ -19,7 +19,7 @@ The macOS build is signed ad hoc and not notarised, so Gatekeeper blocks it the 
 ### Tray icon
 
 - The icon shows whether a timer is running. The tooltip shows "Client · Project" and the elapsed time, and on macOS the time also sits next to the icon.
-- Left click opens the window. Right click opens a menu with your favourites to start, "Stop all timers", the window, the settings and Horaka in the browser.
+- Left click opens the window. Right click opens a menu (with icons on Windows) with your favourites to start, "Stop all timers", the window, the settings and Horaka in the browser.
 
 ### Main window
 

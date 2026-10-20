@@ -1,6 +1,6 @@
 [package]
 name = "horaka-desktop"
-version = "1.1.0"
+version = "1.1.1"
 description = "Horaka Desktop: Timer im Infobereich und in der Menüleiste"
 authors = ["giant Computer Systems"]
 edition = "2021"

@@ -44,7 +44,6 @@ if (offline) {
         void emit('stand', stand());
     }, 6000);
 }
-let gemerkt = false;
 let abschluss: Gestoppt[] = [];
 let einstellungen: Einstellungen = {
     thema: 'system',
@@ -151,11 +150,6 @@ mockIPC(
                 return null;
             case 'kuerzel_fortsetzen':
                 return [];
-            case 'ort_gemerkt':
-                return gemerkt;
-            case 'ort_zuruecksetzen':
-                gemerkt = false;
-                return null;
             case 'plugin:app|version':
                 return version;
             case 'plugin:autostart|is_enabled':

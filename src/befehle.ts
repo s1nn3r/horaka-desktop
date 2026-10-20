@@ -13,8 +13,6 @@ export const trennen = () => invoke<Stand>('trennen');
 export const neuLaden = () => invoke<Stand>('neu_laden');
 export const verbergen = () => invoke<void>('verbergen');
 export const groesseSetzen = (breite: number, hoehe: number) => invoke<void>('groesse_setzen', { breite, hoehe });
-export const ortZuruecksetzen = () => invoke<void>('ort_zuruecksetzen');
-export const ortGemerkt = () => invoke<boolean>('ort_gemerkt');
 export const appOeffnen = (pfad?: string) => invoke<void>('app_oeffnen', { pfad: pfad ?? null });
 
 export const notizSetzen = (id: number, notiz: string) => invoke<Stand>('notiz_setzen', { id, notiz });

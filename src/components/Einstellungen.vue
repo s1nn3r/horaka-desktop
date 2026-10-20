@@ -2,7 +2,7 @@
 import { getVersion } from '@tauri-apps/api/app';
 import { disable, enable, isEnabled } from '@tauri-apps/plugin-autostart';
 import { onMounted, ref } from 'vue';
-import { alsFehler, ortGemerkt, ortZuruecksetzen, trennen, updateSuchen } from '../befehle';
+import { alsFehler, trennen, updateSuchen } from '../befehle';
 import { mit, SPRACHEN, t } from '../i18n';
 import { anzeigen } from '../kuerzel';
 import type { Auswahl, Einstellungen, Fehler, Kuerzel, Stand, Thema } from '../typen';
@@ -11,7 +11,7 @@ import SchalterZeile from './SchalterZeile.vue';
 
 // Einstellungen der App in drei Registern: Allgemein (Darstellung, Sprache,
 // Kompaktansicht, Notiz beim Stoppen), Tastenkürzel, System (Autostart,
-// Updates, Fensterposition, Verbindung). Gespeichert wird in App.vue
+// Updates, Verbindung). Gespeichert wird in App.vue
 // (Ereignis `aendern`), die Antwort sagt, welche Kürzel belegt sind.
 const props = defineProps<{ einstellungen: Einstellungen; belegt: string[]; auswahl: Auswahl | null; update: string | null }>();
 const emit = defineEmits<{
@@ -51,13 +51,11 @@ const reiterTitel = { allgemein: t.einstellungen.allgemein, kuerzel: t.einstellu
 
 const autostart = ref(false);
 const version = ref('');
-const gemerkt = ref(false);
 const sucht = ref(false);
 const geprueft = ref(false);
 
 onMounted(async () => {
     version.value = await getVersion();
-    gemerkt.value = await ortGemerkt();
     try {
         autostart.value = await isEnabled();
     } catch (e) {
@@ -88,11 +86,6 @@ async function jetztSuchen() {
     } finally {
         sucht.value = false;
     }
-}
-
-async function ortLoesen() {
-    await ortZuruecksetzen();
-    gemerkt.value = false;
 }
 
 async function verbindungTrennen() {
@@ -264,15 +257,6 @@ async function verbindungTrennen() {
                 <h2 class="mb-1.5 px-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{{ t.einstellungen.system }}</h2>
                 <div class="divide-y divide-border overflow-hidden rounded-xl border border-border bg-muted/40">
                     <SchalterZeile :titel="t.einstellungen.autostart" :text="t.einstellungen.autostartText" :an="autostart" @aendern="autostartSetzen" />
-                    <div class="flex items-center gap-3 px-3 py-2.5">
-                        <span class="min-w-0 flex-1">
-                            <span class="block text-[13px] font-medium">{{ t.einstellungen.ort }}</span>
-                            <span class="block text-[12px] leading-snug text-muted-foreground">{{ gemerkt ? t.einstellungen.ortGemerkt : t.einstellungen.ortSymbol }}</span>
-                        </span>
-                        <button v-if="gemerkt" type="button" class="h-8 shrink-0 rounded-md border border-border bg-background px-3 text-[12px] font-medium hover:bg-muted" @click="ortLoesen">
-                            {{ t.einstellungen.ortZuruecksetzen }}
-                        </button>
-                    </div>
                 </div>
             </section>
 

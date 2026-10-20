@@ -57,7 +57,6 @@ Three tabs with grouped switches: General, Shortcuts and System.
 - Keyboard shortcuts
 - Updates: checks at start and every 6 hours (you can turn this off), or on request
 - Start when you sign in to your computer
-- Window position: back to opening at the icon
 - Disconnect
 
 <p>

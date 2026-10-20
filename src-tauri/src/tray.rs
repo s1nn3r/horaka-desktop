@@ -31,7 +31,8 @@ fn symbol(laeuft: bool) -> Image<'static> {
 
 // Windows hält im Menü links eine Spalte für Symbole frei: dort stehen
 // die Symbole der App (Quellen assets/menu-*.svg, 32 px nach
-// icons/menu). macOS hat diese Spalte nicht und bleibt bei reinem Text mit
+// icons/menu), vor Favoriten der Play-Pfeil in der Projektfarbe
+// (`pfeil.rs`). macOS hat diese Spalte nicht und bleibt bei reinem Text mit
 // ▶ und ● vor Favoriten und laufenden Timern.
 #[cfg(windows)]
 fn eintrag(
@@ -39,16 +40,9 @@ fn eintrag(
     id: impl Into<tauri::menu::MenuId>,
     text: impl AsRef<str>,
     an: bool,
-    bild: &'static [u8],
+    bild: Option<Image<'static>>,
 ) -> tauri::Result<tauri::menu::IconMenuItem<Wry>> {
-    tauri::menu::IconMenuItem::with_id(
-        app,
-        id,
-        text,
-        an,
-        Image::from_bytes(bild).ok(),
-        None::<&str>,
-    )
+    tauri::menu::IconMenuItem::with_id(app, id, text, an, bild, None::<&str>)
 }
 
 #[cfg(not(windows))]
@@ -57,9 +51,13 @@ fn eintrag(
     id: impl Into<tauri::menu::MenuId>,
     text: impl AsRef<str>,
     an: bool,
-    _bild: &'static [u8],
+    _bild: Option<Image<'static>>,
 ) -> tauri::Result<tauri::menu::MenuItem<Wry>> {
     tauri::menu::MenuItem::with_id(app, id, text, an, None::<&str>)
+}
+
+fn png(bytes: &'static [u8]) -> Option<Image<'static>> {
+    Image::from_bytes(bytes).ok()
 }
 
 const VOR_START: &str = if cfg!(windows) { "" } else { "▶ " };
@@ -169,7 +167,7 @@ fn menu_bauen(
                     format!("laufend:{}", e.id),
                     text,
                     false,
-                    include_bytes!("../icons/tray/win-laeuft.png"),
+                    png(include_bytes!("../icons/tray/win-laeuft.png")),
                 )?);
             }
             menu = menu
@@ -178,7 +176,7 @@ fn menu_bauen(
                     "stop",
                     t.alle_stoppen,
                     true,
-                    include_bytes!("../icons/menu/stopp.png"),
+                    png(include_bytes!("../icons/menu/stopp.png")),
                 )?)
                 .separator();
         }
@@ -202,7 +200,15 @@ fn menu_bauen(
                 id,
                 text,
                 true,
-                include_bytes!("../icons/menu/start.png"),
+                Some(Image::new_owned(
+                    crate::pfeil::rgba(
+                        auswahl
+                            .projekt(k.project_id)
+                            .map_or("", |p| p.color.as_str()),
+                    ),
+                    crate::pfeil::GROESSE,
+                    crate::pfeil::GROESSE,
+                )),
             )?);
         }
         if !gesehen.is_empty() {
@@ -215,21 +221,21 @@ fn menu_bauen(
         "zeigen",
         t.fenster_oeffnen,
         true,
-        include_bytes!("../icons/menu/fenster.png"),
+        png(include_bytes!("../icons/menu/fenster.png")),
     )?)
     .item(&eintrag(
         app,
         "einstellungen",
         t.einstellungen,
         true,
-        include_bytes!("../icons/menu/einstellungen.png"),
+        png(include_bytes!("../icons/menu/einstellungen.png")),
     )?)
     .item(&eintrag(
         app,
         "app",
         t.im_browser,
         true,
-        include_bytes!("../icons/menu/browser.png"),
+        png(include_bytes!("../icons/menu/browser.png")),
     )?)
     .separator()
     .item(&eintrag(
@@ -237,7 +243,7 @@ fn menu_bauen(
         "beenden",
         t.beenden,
         true,
-        include_bytes!("../icons/menu/beenden.png"),
+        png(include_bytes!("../icons/menu/beenden.png")),
     )?)
     .build()
 }

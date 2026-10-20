@@ -6,8 +6,7 @@
 //!
 //! Das Fenster öffnet am Symbol und schließt beim Wegklicken wie ein Menü.
 //! Zieht man es an der Kopfzeile woanders hin, bleibt es dort (auch nach
-//! einem Neustart, `fenster.json`) und schließt nicht mehr von selbst, bis
-//! man die Position in den Einstellungen zurücksetzt. In der Kompaktansicht
+//! einem Neustart, `fenster.json`) und schließt nicht mehr von selbst. In der Kompaktansicht
 //! ist das Fenster klein, passt seine Höhe dem Inhalt an (`groesse_setzen`),
 //! schließt nie von selbst und öffnet beim Start.
 //!
@@ -21,6 +20,7 @@ mod api;
 mod einstellungen;
 mod meldung;
 mod oauth;
+mod pfeil;
 mod texte;
 mod tray;
 mod zeit;
@@ -721,19 +721,6 @@ fn kuerzel_fortsetzen(app: AppHandle) -> Vec<String> {
     einstellungen::kuerzel_anmelden(&app, &e)
 }
 
-/// Das Fenster öffnet wieder am Symbol und schließt beim Wegklicken.
-#[tauri::command]
-fn ort_zuruecksetzen(app: AppHandle) {
-    *app.state::<Zustand>().ort.lock().unwrap() = None;
-    ort_speichern(&app, None);
-    fenster_zeigen(&app);
-}
-
-#[tauri::command]
-fn ort_gemerkt(app: AppHandle) -> bool {
-    app.state::<Zustand>().ort.lock().unwrap().is_some()
-}
-
 #[tauri::command]
 async fn neu_laden(app: AppHandle) -> Result<Stand, Fehler> {
     if !zugang::vorhanden() {
@@ -870,8 +857,6 @@ pub fn run() {
             ausloesen,
             verbergen,
             app_oeffnen,
-            ort_zuruecksetzen,
-            ort_gemerkt,
             notiz_setzen,
             abschluss_ueberspringen,
             einstellungen_lesen,

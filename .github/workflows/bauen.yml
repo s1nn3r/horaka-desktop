@@ -1,0 +1,104 @@
+# Baut Horaka Desktop für Windows (x64, nur der NSIS-Installer mit Deutsch
+# und Englisch, ohne MSI) und macOS (Universal: Apple Silicon
+# und Intel). Jeder Push baut und legt die Installer als Artefakt ab; ein Tag
+# v* legt zusätzlich einen Release-Entwurf an.
+#
+# Windows wird mit Azure Artifact Signing signiert, sobald die Secrets
+# gesetzt sind (AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID,
+# AZURE_SIGNING_ENDPOINT, AZURE_SIGNING_ACCOUNT, AZURE_SIGNING_PROFILE).
+# macOS ist nur ad-hoc signiert (signingIdentity "-"), ohne Apple-Konto.
+#
+# Updates: jedes Release trägt latest.json und signierte Update-Artefakte
+# (TAURI_SIGNING_PRIVATE_KEY, Passwort in TAURI_SIGNING_PRIVATE_KEY_PASSWORD;
+# Sicherung des Schlüssels auf LX02 unter /root/.horaka-desktop, root-only).
+# Die App sucht unter releases/latest/download/latest.json.
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            args: ''
+            bundles: src-tauri/target/release/bundle
+          - os: macos-latest
+            args: '--target universal-apple-darwin'
+            bundles: src-tauri/target/universal-apple-darwin/release/bundle
+    runs-on: ${{ matrix.os }}
+    env:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SIGNING_ENDPOINT: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+      AZURE_SIGNING_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+      AZURE_SIGNING_PROFILE: ${{ secrets.AZURE_SIGNING_PROFILE }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - run: npm ci
+
+      - name: Check UI
+        run: npm run types:check
+
+      - name: Check Rust
+        run: |
+          cargo fmt --manifest-path src-tauri/Cargo.toml --check
+          cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+          cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Prepare Windows signing
+        if: matrix.os == 'windows-latest' && env.AZURE_CLIENT_ID != ''
+        shell: pwsh
+        run: |
+          cargo install trusted-signing-cli --locked
+          $befehl = "trusted-signing-cli -e $env:AZURE_SIGNING_ENDPOINT -a $env:AZURE_SIGNING_ACCOUNT -c $env:AZURE_SIGNING_PROFILE -d HorakaDesktop %1"
+          @{ bundle = @{ windows = @{ signCommand = $befehl } } } | ConvertTo-Json -Depth 5 | Set-Content -Path src-tauri/tauri.signieren.conf.json
+          "TAURI_SIGNIEREN=--config src-tauri/tauri.signieren.conf.json" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      # Update-Artefakte (setup.exe und .app.tar.gz mit .sig, latest.json)
+      # signiert mit dem Updater-Schlüssel; die App prüft die Signatur.
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          args: ${{ matrix.args }} ${{ env.TAURI_SIGNIEREN }}
+          tagName: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+          releaseName: 'Horaka Desktop __VERSION__'
+          releaseBody: 'Installers for Windows (setup.exe) and macOS (.dmg). Setup instructions: https://www.horaka.com'
+          releaseDraft: true
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: horaka-desktop-${{ matrix.os }}
+          path: |
+            ${{ matrix.bundles }}/nsis/*.exe
+            ${{ matrix.bundles }}/dmg/*.dmg
+          if-no-files-found: error

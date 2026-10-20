@@ -1,0 +1,96 @@
+@import 'tailwindcss';
+
+/*
+ * Farben aus den Tokens von Horaka (resources/css/tokens.css), hell und
+ * dunkel nach System. Tannengrün ist die Marke, Moos die Grautöne.
+ */
+:root {
+    --background: #ffffff;
+    --foreground: #17201d;
+    --muted: #eef1ee;
+    --muted-foreground: #5c6863;
+    --border: #e6eae6;
+    --primary: #0f6e63;
+    --primary-foreground: #ffffff;
+    --primary-tint: #eef7f5;
+    --destructive: #c0392b;
+    --destructive-foreground: #ffffff;
+    --ring: #0f6e63;
+    color-scheme: light;
+}
+
+/* Dunkel nach System, außer in den Einstellungen ist Hell gewählt; Dunkel
+   gewählt gilt immer (data-theme aus src/thema.ts). */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+        --background: #161c19;
+        --foreground: #e8ece9;
+        --muted: #222b27;
+        --muted-foreground: #9ba59f;
+        --border: #2a3431;
+        --primary: #4fb3a4;
+        --primary-foreground: #0d1512;
+        --primary-tint: #0d2a26;
+        --destructive: #e06b5e;
+        --destructive-foreground: #0d1512;
+        --ring: #4fb3a4;
+        color-scheme: dark;
+    }
+}
+
+:root[data-theme='dark'] {
+    --background: #161c19;
+    --foreground: #e8ece9;
+    --muted: #222b27;
+    --muted-foreground: #9ba59f;
+    --border: #2a3431;
+    --primary: #4fb3a4;
+    --primary-foreground: #0d1512;
+    --primary-tint: #0d2a26;
+    --destructive: #e06b5e;
+    --destructive-foreground: #0d1512;
+    --ring: #4fb3a4;
+    color-scheme: dark;
+}
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-border: var(--border);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary-tint: var(--primary-tint);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-ring: var(--ring);
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+html,
+body,
+#app {
+    height: 100%;
+}
+
+/* Das Fenster ist durchsichtig (Kompaktansicht blendet aus); den
+   Hintergrund bringt der Rahmen in App.vue mit. */
+body {
+    margin: 0;
+    background: transparent;
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible:not(input, textarea, select) {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+input {
+    user-select: text;
+}

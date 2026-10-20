@@ -49,8 +49,8 @@ export const fr: Texte = {
         speichern: 'Enregistrer',
         abbrechen: 'Annuler',
         kompakt: 'Vue compacte',
+        breite: 'Modifier la largeur (touches fléchées)',
         gross: 'Vue complète',
-        nichtsLaeuft: 'Aucun chronomètre en cours',
     },
     abschluss: {
         titel: 'Qu’as-tu fait ?',

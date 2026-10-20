@@ -49,8 +49,8 @@ export const pl: Texte = {
         speichern: 'Zapisz',
         abbrechen: 'Anuluj',
         kompakt: 'Widok kompaktowy',
+        breite: 'Zmień szerokość (strzałki)',
         gross: 'Pełny widok',
-        nichtsLaeuft: 'Żaden stoper nie działa',
     },
     abschluss: {
         titel: 'Co zrobiłeś?',

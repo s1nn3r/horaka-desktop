@@ -113,7 +113,34 @@ const mausRaus = () => (drueber.value = false);
 
 const BREITE = 360;
 const HOEHE = 560;
-const KOMPAKT_BREITE = 244;
+// Kompakt: Breite in ganzen Kachelspalten (Kachel 64 px, Abstand 4 px, Rand
+// und Symbolspalte 36 px), am rechten Rand ziehbar; die Zeilen folgen daraus.
+// shortcut: Spaltenzahl nur in localStorage dieses Fensters, in einstellungen.json, falls sie mit umziehen soll.
+const SPALTEN_MIN = 2;
+const SPALTEN_MAX = 10;
+function spaltenGemerkt(): number {
+    try {
+        const n = Number(localStorage.getItem('kompakt-spalten'));
+        return n >= SPALTEN_MIN && n <= SPALTEN_MAX ? n : 3;
+    } catch {
+        return 3;
+    }
+}
+const spalten = ref(spaltenGemerkt());
+const kompaktBreite = computed(() => 36 + spalten.value * 68 - 4);
+function spaltenSetzen(n: number) {
+    spalten.value = Math.min(SPALTEN_MAX, Math.max(SPALTEN_MIN, n));
+    try {
+        localStorage.setItem('kompakt-spalten', String(spalten.value));
+    } catch {
+        // Ohne Speicher gilt die Breite nur bis zum Neustart.
+    }
+}
+watch(spalten, () => {
+    if (kompaktAktiv.value && rahmen.value) {
+        void groesseSetzen(kompaktBreite.value, Math.ceil(rahmen.value.getBoundingClientRect().height));
+    }
+});
 let beobachter: ResizeObserver | null = null;
 
 watch(kompaktAktiv, async (an) => {
@@ -126,7 +153,7 @@ watch(kompaktAktiv, async (an) => {
     await nextTick();
     if (rahmen.value) {
         // Höhe folgt dem Inhalt (laufende Timer, Meldungen).
-        beobachter = new ResizeObserver(([e]) => void groesseSetzen(KOMPAKT_BREITE, Math.ceil(e.target.getBoundingClientRect().height)));
+        beobachter = new ResizeObserver(([e]) => void groesseSetzen(kompaktBreite.value, Math.ceil(e.target.getBoundingClientRect().height)));
         beobachter.observe(rahmen.value);
     }
 });
@@ -191,8 +218,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div ref="rahmen" class="flex flex-col overflow-hidden border border-border bg-background motion-reduce:transition-none"
-        :class="[kompaktAktiv ? '' : 'h-full', vorschauDeckkraft === null ? 'transition-opacity duration-300 ease-out' : '']"
+    <div ref="rahmen" class="flex flex-col overflow-hidden motion-reduce:transition-none"
+        :class="[kompaktAktiv ? 'rounded-lg bg-muted' : 'h-full border border-border bg-background', vorschauDeckkraft === null ? 'transition-opacity duration-300 ease-out' : '']"
         :style="{ opacity: deckkraft }"
     >
         <template v-if="stand && einstellungen">
@@ -225,9 +252,11 @@ onBeforeUnmount(() => {
                 :auswahl="stand.auswahl"
                 :timer="stand.timer"
                 :offline="stand.offline"
+                :spalten="spalten"
                 @stand="uebernehmen"
                 @fehler="zeigeFehler"
                 @gross="kompaktSetzen(false)"
+                @spalten="spaltenSetzen"
             />
             <Haupt
                 v-else-if="stand.auswahl"

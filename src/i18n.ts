@@ -58,8 +58,8 @@ const de = {
         speichern: 'Speichern',
         abbrechen: 'Abbrechen',
         kompakt: 'Kompaktansicht',
+        breite: 'Breite ändern (Pfeiltasten)',
         gross: 'Volle Ansicht',
-        nichtsLaeuft: 'Kein Timer läuft',
     },
     abschluss: {
         titel: 'Was hast du gemacht?',
@@ -207,8 +207,8 @@ const en: Texte = {
         speichern: 'Save',
         abbrechen: 'Cancel',
         kompakt: 'Compact view',
+        breite: 'Change width (arrow keys)',
         gross: 'Full view',
-        nichtsLaeuft: 'No timer running',
     },
     abschluss: {
         titel: 'What did you do?',

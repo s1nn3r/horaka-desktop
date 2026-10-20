@@ -49,8 +49,8 @@ export const nl: Texte = {
         speichern: 'Opslaan',
         abbrechen: 'Annuleren',
         kompakt: 'Compacte weergave',
+        breite: 'Breedte wijzigen (pijltoetsen)',
         gross: 'Volledige weergave',
-        nichtsLaeuft: 'Geen timer actief',
     },
     abschluss: {
         titel: 'Wat heb je gedaan?',

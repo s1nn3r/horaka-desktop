@@ -5,7 +5,7 @@ Horaka Desktop puts your [Horaka](https://www.horaka.com) timer in the Windows n
 <p>
   <img src="docs/screenshots/main-light.png" width="270" alt="Main window with a running timer, favourites and all projects">
   <img src="docs/screenshots/main-dark.png" width="270" alt="The same window in dark mode">
-  <img src="docs/screenshots/compact-light.png" width="366" alt="Compact view with favourites as tiles">
+  <img src="docs/screenshots/compact-light.png" width="456" alt="Compact view with favourites as tiles">
 </p>
 
 ## Download
@@ -36,11 +36,11 @@ The macOS build is signed ad hoc and not notarised, so Gatekeeper blocks it the 
 
 ### Compact view
 
-A small window, 244 px wide, that stays on top and stays open, also after a restart. Every favourite is a tile: click it to start or stop, and a running tile shows its duration. Running timers without a tile appear as a line above the tiles. The header has buttons for Horaka in the browser and the full view.
+A small window in the style of Windows 11 (grey background, thin lines, no title bar) that stays on top and stays open, also after a restart. Every favourite is a tile: click it to start or stop, and a running tile shows its duration. Running timers without a tile appear as a line above the tiles. A slim column on the right has close, full view and Horaka in the browser; drag the window by its grey edge. Drag the right edge to change the width in whole columns (2 to 10, also with the arrow keys), and the rows follow.
 
 The compact view can fade out while the mouse is elsewhere and come back when you hover over it. A slider sets the opacity while faded (10 to 90 percent), and the window previews it while you drag.
 
-<img src="docs/screenshots/compact-dark.png" width="366" alt="Compact view in dark mode">
+<img src="docs/screenshots/compact-dark.png" width="456" alt="Compact view in dark mode">
 
 ### Keyboard shortcuts
 
@@ -96,7 +96,7 @@ cargo test --manifest-path src-tauri/Cargo.toml
 
 To use another instance, set `HORAKA_API_URL` (default `https://api.horaka.com/v1`) and `HORAKA_APP_URL` (default `https://app.horaka.com`).
 
-To regenerate the icons, replace `assets/app-icon.png` (1024 px, made from the logo) and run `npm run icons`. The tray icons are in `src-tauri/icons/tray` (black template images for macOS, coloured for Windows), with their sources in `assets/tray-*.svg`. The screenshots in `docs/screenshots` come from the browser preview at 360 × 560 px and 2x, the compact view at 244 px wide and 3x.
+To regenerate the icons, replace `assets/app-icon.png` (1024 px, made from the logo) and run `npm run icons`. The tray icons are in `src-tauri/icons/tray` (black template images for macOS, coloured for Windows), with their sources in `assets/tray-*.svg`. The screenshots in `docs/screenshots` come from the browser preview at 360 × 560 px and 2x, the compact view with 4 columns (304 px wide) and 3x.
 
 ## Build and release
 

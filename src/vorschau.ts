@@ -144,6 +144,8 @@ mockIPC(
             case 'update_installieren':
                 return null;
             case 'groesse_setzen':
+                // Zum Nachsehen in der Konsole, das Browserfenster bleibt, wie es ist.
+                (window as unknown as { vorschauGroesse: unknown }).vorschauGroesse = args;
                 return null;
             case 'kuerzel_pausieren':
                 return null;

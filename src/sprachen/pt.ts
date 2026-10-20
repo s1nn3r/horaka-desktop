@@ -49,8 +49,8 @@ export const pt: Texte = {
         speichern: 'Guardar',
         abbrechen: 'Cancelar',
         kompakt: 'Vista compacta',
+        breite: 'Alterar largura (setas)',
         gross: 'Vista completa',
-        nichtsLaeuft: 'Nenhum cronómetro em curso',
     },
     abschluss: {
         titel: 'O que fizeste?',

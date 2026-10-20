@@ -49,8 +49,8 @@ export const it: Texte = {
         speichern: 'Salva',
         abbrechen: 'Annulla',
         kompakt: 'Vista compatta',
+        breite: 'Cambia larghezza (tasti freccia)',
         gross: 'Vista completa',
-        nichtsLaeuft: 'Nessun timer in corso',
     },
     abschluss: {
         titel: 'Cosa hai fatto?',

@@ -49,8 +49,8 @@ export const es: Texte = {
         speichern: 'Guardar',
         abbrechen: 'Cancelar',
         kompakt: 'Vista compacta',
+        breite: 'Cambiar ancho (teclas de flecha)',
         gross: 'Vista completa',
-        nichtsLaeuft: 'Ningún temporizador en marcha',
     },
     abschluss: {
         titel: '¿Qué has hecho?',

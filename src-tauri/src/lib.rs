@@ -812,7 +812,7 @@ fn groesse_setzen(app: AppHandle, breite: f64, hoehe: f64) {
     // Die Kompaktansicht soll über allem bleiben, auch nach einem Wechsel.
     let _ = w.set_always_on_top(true);
     let _ = w.set_size(LogicalSize::new(
-        breite.clamp(240.0, 480.0),
+        breite.clamp(160.0, 720.0),
         hoehe.clamp(60.0, 720.0),
     ));
     in_sichtbaren_bereich(&w);

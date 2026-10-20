@@ -76,19 +76,6 @@ const ohneKachel = computed(() => {
     return laufende.value.filter((l) => !gezeigt.has(l.eintrag.id));
 });
 
-// Schrift auf der Projektfarbe: schwarz oder weiß, je nachdem, was besser lesbar ist.
-function schriftAuf(farbe: string | undefined): string {
-    const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(farbe ?? '');
-    if (!m) {
-        return '#ffffff';
-    }
-    const [r, g, b] = m.slice(1).map((h) => {
-        const c = parseInt(h, 16) / 255;
-        return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-    });
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.18 ? '#000000' : '#ffffff';
-}
-
 function titel(projekt: Projekt | null, taetigkeit: Taetigkeit | null): string {
     return [projekt?.client_name, projekt?.name, taetigkeit?.name].filter(Boolean).join(' · ');
 }
@@ -119,15 +106,15 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
             <div
                 v-for="l in ohneKachel"
                 :key="l.eintrag.id"
-                class="flex h-8 items-center gap-2 rounded-md pr-1 pl-2.5"
-                :style="{ background: l.projekt?.color ?? 'var(--primary)', color: schriftAuf(l.projekt?.color) }"
+                class="kachel-laufend kachel-streifen flex h-8 items-center gap-2 rounded-md pr-1 pl-3.5"
+                :style="{ '--farbe': l.projekt?.color ?? 'var(--primary)' }"
                 :title="titel(l.projekt, l.taetigkeit)"
             >
                 <span class="min-w-0 flex-1 truncate text-[12px]">{{ l.projekt?.name ?? `#${l.eintrag.project_id}` }}</span>
-                <span class="text-[12px] font-semibold tabular-nums">{{ dauer(seit(l.eintrag.started_at, jetzt)) }}</span>
+                <span class="zeit-laufend text-[12px] font-semibold tabular-nums">{{ dauer(seit(l.eintrag.started_at, jetzt)) }}</span>
                 <button
                     type="button"
-                    class="flex size-6 shrink-0 items-center justify-center rounded hover:bg-black/15"
+                    class="flex size-6 shrink-0 items-center justify-center rounded text-destructive hover:bg-foreground/10"
                     :disabled="beschaeftigt"
                     :title="t.haupt.stoppen"
                     @click="aktion('stop', l.eintrag.project_id)"
@@ -136,44 +123,43 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
                 </button>
             </div>
 
-            <!-- Favoriten als Kacheln wie Windows 11: Name, darunter Farbe und Tätigkeit (oder Kunde), laufend in der Projektfarbe mit Dauer. -->
+            <!-- Favoriten als Kacheln wie Windows 11: Farbstreifen links, Name, darunter Tätigkeit (oder Kunde); laufend zart in der Projektfarbe getönt und umrandet, mit Dauer. -->
             <div v-if="kacheln.length > 0" data-tauri-drag-region class="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2">
                 <button
                     v-for="k in kacheln"
                     :key="k.schluessel"
                     type="button"
-                    class="flex h-12 min-w-0 flex-col justify-center gap-0.5 rounded-md px-2.5 text-left"
-                    :class="k.lauf ? '' : 'bg-kachel shadow-[inset_0_0_0_var(--haarlinie)_var(--muted-foreground)] hover:bg-kachel-hover active:text-foreground/70'"
-                    :style="k.lauf ? { background: k.projekt.color, color: schriftAuf(k.projekt.color) } : undefined"
+                    class="kachel-streifen flex h-12 min-w-0 flex-col justify-center gap-0.5 rounded-md pr-2.5 pl-3.5 text-left"
+                    :class="k.lauf ? 'kachel-laufend' : 'bg-kachel shadow-[inset_0_0_0_var(--haarlinie)_var(--kante)] hover:bg-kachel-hover active:text-foreground/70'"
+                    :style="{ '--farbe': k.projekt.color }"
                     :disabled="beschaeftigt"
                     :title="`${titel(k.projekt, k.taetigkeit)} · ${k.lauf ? t.haupt.stoppen : t.haupt.starten}`"
                     @click="aktion(k.lauf ? 'stop' : 'start', k.projekt.id, k.taetigkeit?.id ?? null)"
                 >
                     <span class="truncate text-[12px] leading-4">{{ k.projekt.name }}</span>
-                    <span v-if="k.lauf" class="text-[11px] leading-4 font-semibold tabular-nums opacity-90">{{ dauer(seit(k.lauf.eintrag.started_at, jetzt)) }}</span>
-                    <span v-else class="flex min-w-0 items-center gap-1.5 text-[11px] leading-4 text-muted-foreground">
-                        <span class="size-2 shrink-0 rounded-[2px]" :style="{ background: k.projekt.color }" />
-                        <span class="truncate">{{ k.taetigkeit?.name ?? k.projekt.client_name }}</span>
-                    </span>
+                    <span v-if="k.lauf" class="zeit-laufend text-[11px] leading-4 font-semibold tabular-nums">{{ dauer(seit(k.lauf.eintrag.started_at, jetzt)) }}</span>
+                    <span v-else class="truncate text-[11px] leading-4 text-muted-foreground">{{ k.taetigkeit?.name ?? k.projekt.client_name }}</span>
                 </button>
             </div>
         </div>
 
-        <!-- Statt Kopfzeile: Schließen, volle Ansicht, im Browser öffnen. -->
-        <div data-tauri-drag-region class="flex shrink-0 flex-col gap-0.5">
-            <!-- Symbole 16 px im 16er Raster, damit sie auf ganze Pixel fallen. -->
-            <button type="button" class="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.schliessen" @click="verbergen()">
-                <svg viewBox="0 0 16 16" class="size-4" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+        <!-- Statt Kopfzeile: Schließen, volle Ansicht, im Browser öffnen. Die Spalte
+             ist so hoch wie die Kacheln (bei einer Reihe 48 px, oben und unten bündig),
+             höchstens 96 px, damit die Symbole bei mehreren Reihen nicht zu weit auseinanderstehen. -->
+        <div data-tauri-drag-region class="flex max-h-24 w-6 shrink-0 flex-col">
+            <!-- Symbole 12 px im 12er Raster, damit sie auf ganze Pixel fallen. -->
+            <button type="button" class="flex flex-1 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.schliessen" @click="verbergen()">
+                <svg viewBox="0 0 12 12" class="size-3" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /></svg>
             </button>
-            <button type="button" class="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.gross" @click="emit('gross')">
+            <button type="button" class="flex flex-1 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.gross" @click="emit('gross')">
                 <!-- Vergrößern (Form wie lucide „maximize-2“). -->
-                <svg viewBox="0 0 16 16" class="size-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M10 2.5h3.5V6M6 13.5H2.5V10M13.5 2.5L9 7M2.5 13.5L7 9" />
+                <svg viewBox="0 0 12 12" class="size-3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M7.5 1.5h3v3M4.5 10.5h-3v-3M10.5 1.5L7 5M1.5 10.5L5 7" />
                 </svg>
             </button>
-            <button type="button" class="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.oeffnen" @click="appOeffnen()">
-                <svg viewBox="0 0 16 16" class="size-4" aria-hidden="true">
-                    <path d="M9 3h4v4M13 3L7.5 8.5M11 9.5V13H3V5h3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <button type="button" class="flex flex-1 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground" :title="t.haupt.oeffnen" @click="appOeffnen()">
+                <svg viewBox="0 0 12 12" class="size-3" aria-hidden="true">
+                    <path d="M7 1.5h3.5V5M10.5 1.5L6 6M8.5 7v3.5h-7v-7H5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </button>
         </div>

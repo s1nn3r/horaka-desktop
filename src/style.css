@@ -18,8 +18,11 @@
     --ring: #0f6e63;
     /* Kompaktansicht in den Neutraltönen von Windows 11 (Flyout und Kacheln). */
     --flyout: #f3f3f3;
-    --kachel: #e9ebee;
-    --kachel-hover: #f2f3f5;
+    --kachel: #ffffff;
+    --kachel-hover: #f9f9f9;
+    --kante: #e0e0e0;
+    /* Haarlinien der Kompaktansicht, hell genug, dass sie als Grau wirken. */
+    --linie: #a8abaf;
     color-scheme: light;
 }
 
@@ -39,8 +42,10 @@
         --destructive-foreground: #0d1512;
         --ring: #4fb3a4;
         --flyout: #272727;
-        --kachel: #3a3a3a;
-        --kachel-hover: #444444;
+        --kachel: #323232;
+        --kachel-hover: #3a3a3a;
+        --kante: rgba(255, 255, 255, 0.08);
+        --linie: rgba(255, 255, 255, 0.22);
         color-scheme: dark;
     }
 }
@@ -58,8 +63,10 @@
     --destructive-foreground: #0d1512;
     --ring: #4fb3a4;
     --flyout: #272727;
-    --kachel: #3a3a3a;
-    --kachel-hover: #444444;
+    --kachel: #323232;
+    --kachel-hover: #3a3a3a;
+    --kante: rgba(255, 255, 255, 0.08);
+    --linie: rgba(255, 255, 255, 0.22);
     color-scheme: dark;
 }
 
@@ -105,6 +112,29 @@
     :root {
         --haarlinie: 0.34px;
     }
+}
+
+/* Laufende Kachel der Kompaktansicht: zart in der Projektfarbe (--farbe am
+   Element) getönt, mit Rahmen in der Farbe; die Zeit in der Farbe, zur
+   Schrift hin gemischt, damit sie auch im Dunkeln lesbar bleibt. */
+.kachel-laufend {
+    background: color-mix(in srgb, var(--farbe) 16%, var(--kachel));
+    box-shadow: inset 0 0 0 1px var(--farbe);
+}
+/* Farbstreifen links in der Projektfarbe, an jeder Kachel. */
+.kachel-streifen {
+    position: relative;
+    overflow: hidden;
+}
+.kachel-streifen::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--farbe);
+}
+.zeit-laufend {
+    color: color-mix(in srgb, var(--farbe) 75%, var(--foreground));
 }
 
 html,

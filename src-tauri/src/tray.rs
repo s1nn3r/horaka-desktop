@@ -9,7 +9,7 @@ use crate::texte::Texte;
 use tauri::image::Image;
 use tauri::menu::{Menu, MenuBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Wry};
+use tauri::{AppHandle, Manager, Wry};
 
 pub const ID: &str = "horaka";
 
@@ -181,6 +181,10 @@ fn menu_bauen(
                 .separator();
         }
 
+        // Das Menü folgt dem Thema des Systems, das Fenster meldet es.
+        let dunkel =
+            app.get_webview_window("main").and_then(|w| w.theme().ok()) == Some(tauri::Theme::Dark);
+
         // Nur die Favoriten (in ihrer Reihenfolge aus Horaka), nicht
         // zuletzt verwendet: das Menü bleibt so immer gleich.
         let mut gesehen = Vec::new();
@@ -205,6 +209,7 @@ fn menu_bauen(
                         auswahl
                             .projekt(k.project_id)
                             .map_or("", |p| p.color.as_str()),
+                        dunkel,
                     ),
                     crate::pfeil::GROESSE,
                     crate::pfeil::GROESSE,

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { abschlussUeberspringen, alsFehler, notizSetzen } from '../befehle';
+import { projektfarbe } from '../farbe';
 import { mit, t } from '../i18n';
 import type { Auswahl, Fehler, Gestoppt, Stand } from '../typen';
 import { dauer } from '../zeit';
@@ -68,7 +69,7 @@ function taste(e: KeyboardEvent) {
         </div>
 
         <div class="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
-            <span class="size-2.5 shrink-0 rounded-full" :style="{ background: projekt?.color ?? 'currentColor' }" />
+            <span class="size-2.5 shrink-0 rounded-full" :style="{ background: projektfarbe(projekt?.color) }" />
             <div class="min-w-0 flex-1">
                 <div class="truncate font-medium">{{ projekt?.name ?? `#${aktuell.project_id}` }}</div>
                 <div class="truncate text-[12px] text-muted-foreground">{{ [projekt?.client_name, taetigkeit?.name].filter(Boolean).join(' · ') }}</div>

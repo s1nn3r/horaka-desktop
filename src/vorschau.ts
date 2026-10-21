@@ -9,10 +9,10 @@ import type { Auswahl, Einstellungen, Gestoppt, Stand, Timer } from './typen';
 
 const auswahl: Auswahl = {
     projects: [
-        { id: 1, name: 'Website Relaunch', client_id: 1, client_name: 'Müller GmbH', color: '#2563eb', status: 'active', activities: [{ id: 10, name: 'Design' }, { id: 11, name: 'Meeting' }] },
-        { id: 2, name: 'Wartung', client_id: 1, client_name: 'Müller GmbH', color: '#0f6e63', status: 'active', activities: [{ id: 11, name: 'Meeting' }] },
-        { id: 3, name: 'Kampagne Herbst', client_id: 2, client_name: 'Anker AG', color: '#d97706', status: 'paused', activities: [] },
-        { id: 4, name: 'Buchhaltung', client_id: 3, client_name: 'Intern', color: '#7c3aed', status: 'active', activities: [{ id: 11, name: 'Meeting' }] },
+        { id: 1, name: 'Website Relaunch', client_id: 1, client_name: 'Müller GmbH', color: 'blue', status: 'active', activities: [{ id: 10, name: 'Design' }, { id: 11, name: 'Meeting' }] },
+        { id: 2, name: 'Wartung', client_id: 1, client_name: 'Müller GmbH', color: 'teal', status: 'active', activities: [{ id: 11, name: 'Meeting' }] },
+        { id: 3, name: 'Kampagne Herbst', client_id: 2, client_name: 'Anker AG', color: 'amber', status: 'paused', activities: [] },
+        { id: 4, name: 'Buchhaltung', client_id: 3, client_name: 'Intern', color: 'purple', status: 'active', activities: [{ id: 11, name: 'Meeting' }] },
     ],
     favorites: [
         { project_id: 1, activity_id: 10 },

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { alsFehler, aufGezeigt, aufNotizFokus, ausloesen } from '../befehle';
+import { projektfarbe } from '../farbe';
 import { t } from '../i18n';
 import type { Aktion, Auswahl, Fehler, Kombination, Projekt, Stand, Taetigkeit, Timer } from '../typen';
 import { dauer, seit, useUhr } from '../zeit';
@@ -174,7 +175,7 @@ onBeforeUnmount(() => abmelden.forEach((fn) => fn()));
         </div>
         <div v-for="l in laufende" :key="l.eintrag.id" class="py-1">
             <div class="flex min-h-11 items-center gap-2">
-                <span class="size-2.5 shrink-0 animate-pulse rounded-full" :style="{ background: l.paar?.projekt.color ?? 'currentColor' }" />
+                <span class="size-2.5 shrink-0 animate-pulse rounded-full" :style="{ background: projektfarbe(l.paar?.projekt.color) }" />
                 <div class="min-w-0 flex-1">
                     <div class="truncate font-medium">{{ l.paar?.projekt.name ?? `#${l.eintrag.project_id}` }}</div>
                     <div class="truncate text-[12px] text-muted-foreground">

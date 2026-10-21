@@ -20,9 +20,9 @@ mod api;
 mod einstellungen;
 mod meldung;
 mod oauth;
-mod pfeil;
 mod texte;
 mod tray;
+mod zeichen;
 mod zeit;
 mod zugang;
 
@@ -304,6 +304,14 @@ pub fn menu_ereignis(app: &AppHandle, id: &str) {
         "beenden" => app.exit(0),
         "stop" => aktion_im_hintergrund(app, "stop", None, None),
         _ => {
+            // Laufende Zeile im Menü: dieses Projekt stoppen.
+            if let Some(projekt) = id
+                .strip_prefix("stopp:")
+                .and_then(|s| s.parse::<i64>().ok())
+            {
+                aktion_im_hintergrund(app, "stop", Some(projekt), None);
+                return;
+            }
             if let Some(rest) = id.strip_prefix("start:") {
                 let mut teile = rest.split(':');
                 let projekt = teile.next().and_then(|s| s.parse::<i64>().ok());

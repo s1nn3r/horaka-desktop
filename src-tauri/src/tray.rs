@@ -4,8 +4,9 @@
 //! gedrückter Ctrl-Taste (macOS) öffnet das Menü mit den Favoriten,
 //! Linksklick das Fenster.
 
-use crate::api::{Auswahl, Timer};
+use crate::api::{Auswahl, Eintrag, Timer};
 use crate::texte::Texte;
+use crate::zeichen::Form;
 use tauri::image::Image;
 use tauri::menu::{Menu, MenuBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
@@ -34,6 +35,11 @@ fn symbol(laeuft: bool) -> Image<'static> {
 // icons/menu), vor Favoriten der Play-Pfeil in der Projektfarbe
 // (`pfeil.rs`). macOS hat diese Spalte nicht und bleibt bei reinem Text mit
 // ▶ und ● vor Favoriten und laufenden Timern.
+/// `&` im Menütext markiert sonst ein Tastenkürzel („B&R“ würde zu „BR“).
+fn maskiert(text: impl AsRef<str>) -> String {
+    text.as_ref().replace('&', "&&")
+}
+
 #[cfg(windows)]
 fn eintrag(
     app: &AppHandle,
@@ -42,7 +48,7 @@ fn eintrag(
     an: bool,
     bild: Option<Image<'static>>,
 ) -> tauri::Result<tauri::menu::IconMenuItem<Wry>> {
-    tauri::menu::IconMenuItem::with_id(app, id, text, an, bild, None::<&str>)
+    tauri::menu::IconMenuItem::with_id(app, id, maskiert(text), an, bild, None::<&str>)
 }
 
 #[cfg(not(windows))]
@@ -53,7 +59,34 @@ fn eintrag(
     an: bool,
     _bild: Option<Image<'static>>,
 ) -> tauri::Result<tauri::menu::MenuItem<Wry>> {
-    tauri::menu::MenuItem::with_id(app, id, text, an, None::<&str>)
+    tauri::menu::MenuItem::with_id(app, id, maskiert(text), an, None::<&str>)
+}
+
+/// Play- oder Stopp-Zeichen in der Farbe des Projekts.
+fn zeichen(auswahl: &Auswahl, projekt: i64, form: Form) -> Option<Image<'static>> {
+    let farbe = auswahl.projekt(projekt).map_or("", |p| p.color.as_str());
+    Some(Image::new_owned(
+        crate::zeichen::rgba(farbe, form),
+        crate::zeichen::GROESSE,
+        crate::zeichen::GROESSE,
+    ))
+}
+
+/// Text einer laufenden Zeile mit ihrer Dauer. Unter Windows steht die Dauer
+/// nach einem Tabulator rechtsbündig (wie Tastenkürzel im Menü), der Text
+/// davor höchstens 40 Zeichen; unter macOS in Klammern dahinter.
+fn mit_dauer(vor: &str, text: &str, e: &Eintrag) -> String {
+    let zeit = dauer(seit(&e.started_at));
+    if cfg!(windows) {
+        let text = if text.chars().count() > 40 {
+            format!("{}…", text.chars().take(39).collect::<String>())
+        } else {
+            text.to_string()
+        };
+        format!("{vor}{text}\t{zeit}")
+    } else {
+        format!("{vor}{text} ({zeit})")
+    }
 }
 
 fn png(bytes: &'static [u8]) -> Option<Image<'static>> {
@@ -61,7 +94,7 @@ fn png(bytes: &'static [u8]) -> Option<Image<'static>> {
 }
 
 const VOR_START: &str = if cfg!(windows) { "" } else { "▶ " };
-const VOR_LAUFEND: &str = if cfg!(windows) { "" } else { "● " };
+const VOR_LAUFEND: &str = if cfg!(windows) { "" } else { "■ " };
 
 pub fn einrichten(app: &AppHandle) -> tauri::Result<()> {
     let menu = menu_bauen(app, None, None)?;
@@ -155,21 +188,39 @@ fn menu_bauen(
     let mut menu = MenuBuilder::new(app);
 
     if let (Some(timer), Some(auswahl)) = (timer, auswahl) {
-        if timer.running {
-            for e in &timer.entries {
-                let text = format!(
-                    "{VOR_LAUFEND}{} ({})",
-                    auswahl.bezeichnung(e.project_id, e.activity_id),
-                    dauer(seit(&e.started_at))
-                );
-                menu = menu.item(&eintrag(
-                    app,
-                    format!("laufend:{}", e.id),
-                    text,
-                    false,
-                    png(include_bytes!("../icons/tray/win-laeuft.png")),
-                )?);
+        // Favoriten in ihrer Reihenfolge aus Horaka, doppelte nur einmal,
+        // nicht zuletzt verwendet: das Menü bleibt so immer gleich.
+        let mut favoriten: Vec<(i64, Option<i64>)> = Vec::new();
+        for k in &auswahl.favorites {
+            if !favoriten.contains(&(k.project_id, k.activity_id)) {
+                favoriten.push((k.project_id, k.activity_id));
             }
+        }
+        // Wie in der Kompaktansicht: ein Favorit ohne Tätigkeit läuft, wenn
+        // irgendetwas im Projekt läuft.
+        let passt = |f: &(i64, Option<i64>), e: &Eintrag| {
+            f.0 == e.project_id && (f.1.is_none() || f.1 == e.activity_id)
+        };
+        let laufende: &[Eintrag] = if timer.running { &timer.entries } else { &[] };
+
+        // Laufende Timer ohne Favorit stehen oben, ebenfalls zum Stoppen.
+        for e in laufende
+            .iter()
+            .filter(|e| !favoriten.iter().any(|f| passt(f, e)))
+        {
+            menu = menu.item(&eintrag(
+                app,
+                format!("stopp:{}", e.project_id),
+                mit_dauer(
+                    VOR_LAUFEND,
+                    &auswahl.bezeichnung(e.project_id, e.activity_id),
+                    e,
+                ),
+                true,
+                zeichen(auswahl, e.project_id, Form::Stopp),
+            )?);
+        }
+        if !laufende.is_empty() {
             menu = menu
                 .item(&eintrag(
                     app,
@@ -181,37 +232,27 @@ fn menu_bauen(
                 .separator();
         }
 
-        // Nur die Favoriten (in ihrer Reihenfolge aus Horaka), nicht
-        // zuletzt verwendet: das Menü bleibt so immer gleich.
-        let mut gesehen = Vec::new();
-        for k in &auswahl.favorites {
-            let schluessel = (k.project_id, k.activity_id);
-            if gesehen.contains(&schluessel) {
-                continue;
-            }
-            gesehen.push(schluessel);
-            let id = format!("start:{}:{}", k.project_id, k.activity_id.unwrap_or(0));
-            let text = format!(
-                "{VOR_START}{}",
-                auswahl.bezeichnung(k.project_id, k.activity_id)
-            );
-            menu = menu.item(&eintrag(
-                app,
-                id,
-                text,
-                true,
-                Some(Image::new_owned(
-                    crate::pfeil::rgba(
-                        auswahl
-                            .projekt(k.project_id)
-                            .map_or("", |p| p.color.as_str()),
-                    ),
-                    crate::pfeil::GROESSE,
-                    crate::pfeil::GROESSE,
-                )),
-            )?);
+        for f in &favoriten {
+            let text = auswahl.bezeichnung(f.0, f.1);
+            let item = match laufende.iter().find(|e| passt(f, e)) {
+                Some(e) => eintrag(
+                    app,
+                    format!("stopp:{}", f.0),
+                    mit_dauer(VOR_LAUFEND, &text, e),
+                    true,
+                    zeichen(auswahl, f.0, Form::Stopp),
+                )?,
+                None => eintrag(
+                    app,
+                    format!("start:{}:{}", f.0, f.1.unwrap_or(0)),
+                    format!("{VOR_START}{text}"),
+                    true,
+                    zeichen(auswahl, f.0, Form::Start),
+                )?,
+            };
+            menu = menu.item(&item);
         }
-        if !gesehen.is_empty() {
+        if !favoriten.is_empty() {
             menu = menu.separator();
         }
     }

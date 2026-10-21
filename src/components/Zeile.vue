@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { projektfarbe } from '../farbe';
 import { t } from '../i18n';
 import type { Aktion, Projekt, Taetigkeit } from '../typen';
 
@@ -34,7 +33,7 @@ const unterzeile = computed(() => {
 
 <template>
     <div class="group flex min-h-11 items-center gap-2 rounded-lg px-2 hover:bg-muted">
-        <span class="size-2.5 shrink-0 rounded-full" :style="{ background: projektfarbe(projekt.color) }" />
+        <span class="size-2.5 shrink-0 rounded-full" :style="{ background: projekt.color }" />
 
         <button
             type="button"

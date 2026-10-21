@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { alsFehler, appOeffnen, ausloesen, verbergen } from '../befehle';
-import { projektfarbe } from '../farbe';
 import { t } from '../i18n';
 import type { Aktion, Auswahl, Fehler, Kombination, Projekt, Stand, Taetigkeit, Timer } from '../typen';
 import { dauer, seit, useUhr } from '../zeit';
@@ -108,7 +107,7 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
                 v-for="l in ohneKachel"
                 :key="l.eintrag.id"
                 class="kachel-laufend kachel-streifen flex h-8 items-center gap-2 rounded-md pr-1 pl-3.5"
-                :style="{ '--farbe': projektfarbe(l.projekt?.color, 'var(--primary)') }"
+                :style="{ '--farbe': l.projekt?.color ?? 'var(--primary)' }"
                 :title="titel(l.projekt, l.taetigkeit)"
             >
                 <span class="min-w-0 flex-1 truncate text-[12px]">{{ l.projekt?.name ?? `#${l.eintrag.project_id}` }}</span>
@@ -132,7 +131,7 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
                     type="button"
                     class="kachel-streifen flex h-12 min-w-0 flex-col justify-center gap-0.5 rounded-md pr-2.5 pl-3.5 text-left"
                     :class="k.lauf ? 'kachel-laufend' : 'bg-kachel shadow-[inset_0_0_0_var(--haarlinie)_var(--kante)] hover:bg-kachel-hover active:text-foreground/70'"
-                    :style="{ '--farbe': projektfarbe(k.projekt.color, 'var(--primary)') }"
+                    :style="{ '--farbe': k.projekt.color }"
                     :disabled="beschaeftigt"
                     :title="`${titel(k.projekt, k.taetigkeit)} · ${k.lauf ? t.haupt.stoppen : t.haupt.starten}`"
                     @click="aktion(k.lauf ? 'stop' : 'start', k.projekt.id, k.taetigkeit?.id ?? null)"

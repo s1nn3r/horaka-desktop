@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { nextTick, ref } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 import { alsFehler, notizSetzen } from '../befehle';
 import { t } from '../i18n';
 import type { Fehler, Stand } from '../typen';
 
 // Notiz am laufenden Timer: zeigt sie, ein Klick öffnet das Feld. Enter
-// speichert, Umschalt+Enter macht eine neue Zeile, Esc bricht ab.
-const props = defineProps<{ id: number; notiz: string | null }>();
-const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler] }>();
+// speichert, Umschalt+Enter macht eine neue Zeile, Esc bricht ab. Mit
+// `offenStart` (Kompaktansicht) gleich offen, `zu` meldet das Schließen.
+const props = defineProps<{ id: number; notiz: string | null; offenStart?: boolean }>();
+const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; zu: [] }>();
 
 const offen = ref(false);
 const text = ref('');
@@ -52,6 +53,9 @@ function taste(e: KeyboardEvent) {
         offen.value = false;
     }
 }
+
+watch(offen, (an) => !an && emit('zu'));
+onMounted(() => props.offenStart && oeffnen());
 
 defineExpose({ oeffnen });
 </script>

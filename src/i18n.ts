@@ -60,6 +60,9 @@ const de = {
         kompakt: 'Kompaktansicht',
         breite: 'Breite ändern (Pfeiltasten)',
         gross: 'Volle Ansicht',
+        notizHinzufuegen: 'Notiz hinzufügen',
+        loeschen: 'Löschen',
+        hoehe: 'Höhe ändern (Pfeiltasten)',
     },
     abschluss: {
         titel: 'Was hast du gemacht?',
@@ -205,6 +208,9 @@ const en: Texte = {
         kompakt: 'Compact view',
         breite: 'Change width (arrow keys)',
         gross: 'Full view',
+        notizHinzufuegen: 'Add note',
+        loeschen: 'Delete',
+        hoehe: 'Change height (arrow keys)',
     },
     abschluss: {
         titel: 'What did you do?',

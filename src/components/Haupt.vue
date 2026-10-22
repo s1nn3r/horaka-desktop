@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import { alsFehler, aufGezeigt, aufNotizFokus, ausloesen } from '../befehle';
+import { alsFehler, aufGezeigt, aufNotizFokus, ausloesen, eintragVerwerfen } from '../befehle';
 import { t } from '../i18n';
+import { kontextmenue } from '../kontext';
+import { useReihenfolge } from '../reihenfolge';
 import type { Aktion, Auswahl, Fehler, Kombination, Projekt, Stand, Taetigkeit, Timer } from '../typen';
 import { dauer, seit, useUhr } from '../zeit';
 import Kopf from './Kopf.vue';
@@ -52,7 +54,9 @@ const laufendSchluessel = computed(() => new Set(laufende.value.map((l) => `${l.
 const laufendeProjekte = computed(() => new Set(laufende.value.map((l) => l.eintrag.project_id)));
 const irgendwasLaeuft = computed(() => laufende.value.length > 0);
 
-const favoriten = computed(() => paare(props.auswahl.favorites));
+// Favoriten in eigener Reihenfolge (Ziehen), unabhängig von Horaka und der Kompaktansicht.
+const reihenfolge = useReihenfolge('haupt');
+const favoriten = computed(() => reihenfolge.ordnen(paare(props.auswahl.favorites)));
 const zuletzt = computed(() => paare(props.auswahl.recent, new Set(favoriten.value.map((f) => f.schluessel))).slice(0, 5));
 
 function passt(text: string, begriffe: string[]): boolean {
@@ -86,15 +90,19 @@ function laeuft(p: Paar): boolean {
 }
 
 async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: number | null = null) {
+    await ausfuehren(() => ausloesen(was, projekt, taetigkeit));
+    if (was !== 'stop') {
+        suche.value = '';
+    }
+}
+
+async function ausfuehren(befehl: () => Promise<Stand>) {
     if (beschaeftigt.value) {
         return;
     }
     beschaeftigt.value = true;
     try {
-        emit('stand', await ausloesen(was, projekt, taetigkeit));
-        if (was !== 'stop') {
-            suche.value = '';
-        }
+        emit('stand', await befehl());
     } catch (e) {
         emit('fehler', alsFehler(e));
     } finally {
@@ -145,6 +153,16 @@ function notizOeffnen() {
     }
 }
 
+// Rechtsklick auf eine Zeile; „Notiz“ springt in das Feld unter dem laufenden Timer.
+function menue(projekt: number, taetigkeit: number | null, lauf = laufende.value.find((l) => l.eintrag.project_id === projekt && (taetigkeit === null || l.eintrag.activity_id === taetigkeit))?.eintrag) {
+    kontextmenue(lauf ?? null, {
+        starten: () => void aktion('start', projekt, taetigkeit),
+        stoppen: () => void aktion('stop', projekt),
+        notiz: (e) => notizFelder.get(e.id)?.oeffnen(),
+        loeschen: (e) => void ausfuehren(() => eintragVerwerfen(e.id)),
+    });
+}
+
 const abmelden: Array<() => void> = [];
 
 onMounted(async () => {
@@ -172,7 +190,7 @@ onBeforeUnmount(() => abmelden.forEach((fn) => fn()));
                 {{ t.haupt.alleStoppen }}
             </button>
         </div>
-        <div v-for="l in laufende" :key="l.eintrag.id" class="py-1">
+        <div v-for="l in laufende" :key="l.eintrag.id" class="py-1" @contextmenu.prevent="menue(l.eintrag.project_id, l.eintrag.activity_id, l.eintrag)">
             <div class="flex min-h-11 items-center gap-2">
                 <span class="size-2.5 shrink-0 animate-pulse rounded-full" :style="{ background: l.paar?.projekt.color ?? 'currentColor' }" />
                 <div class="min-w-0 flex-1">
@@ -227,6 +245,7 @@ onBeforeUnmount(() => abmelden.forEach((fn) => fn()));
                 :andere-laufen="irgendwasLaeuft"
                 :beschaeftigt="beschaeftigt"
                 @aktion="fuerPaar(p, $event)"
+                @contextmenu.prevent="menue(p.projekt.id, p.taetigkeit?.id ?? null)"
             />
             <p v-if="treffer.length === 0" class="px-2 py-6 text-center text-muted-foreground">{{ t.haupt.keine }}</p>
         </template>
@@ -234,7 +253,7 @@ onBeforeUnmount(() => abmelden.forEach((fn) => fn()));
         <template v-else>
             <p v-if="auswahl.projects.length === 0" class="px-2 py-6 text-center text-muted-foreground">{{ t.haupt.leer }}</p>
 
-            <template v-for="gruppe in [{ titel: t.haupt.favoriten, liste: favoriten }, { titel: t.haupt.zuletzt, liste: zuletzt }]" :key="gruppe.titel">
+            <template v-for="gruppe in [{ titel: t.haupt.favoriten, liste: favoriten, ziehbar: true }, { titel: t.haupt.zuletzt, liste: zuletzt, ziehbar: false }]" :key="gruppe.titel">
                 <section v-if="gruppe.liste.length > 0" class="mb-2">
                     <h2 class="px-2 pt-2 pb-1 text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">{{ gruppe.titel }}</h2>
                     <Zeile
@@ -246,7 +265,11 @@ onBeforeUnmount(() => abmelden.forEach((fn) => fn()));
                         :parallel="auswahl.parallel_timers"
                         :andere-laufen="irgendwasLaeuft"
                         :beschaeftigt="beschaeftigt"
+                        :data-schluessel="gruppe.ziehbar ? p.schluessel : undefined"
+                        :class="{ 'opacity-50': reihenfolge.ziehend.value === p.schluessel }"
                         @aktion="fuerPaar(p, $event)"
+                        @contextmenu.prevent="menue(p.projekt.id, p.taetigkeit?.id ?? null)"
+                        @pointerdown="gruppe.ziehbar && reihenfolge.an($event, p.schluessel, favoriten.map((f) => f.schluessel))"
                     />
                 </section>
             </template>
@@ -264,6 +287,7 @@ onBeforeUnmount(() => abmelden.forEach((fn) => fn()));
                         aufklappbar
                         :offen="offen.has(projekt.id)"
                         @aktion="aktion($event, projekt.id)"
+                        @contextmenu.prevent="menue(projekt.id, null)"
                         @umschalten="umschalten(projekt.id)"
                     />
                     <div v-if="offen.has(projekt.id)" class="ml-5 border-l border-border pl-1">
@@ -277,6 +301,7 @@ onBeforeUnmount(() => abmelden.forEach((fn) => fn()));
                             :andere-laufen="irgendwasLaeuft"
                             :beschaeftigt="beschaeftigt"
                             @aktion="aktion($event, projekt.id, taetigkeit.id)"
+                            @contextmenu.prevent="menue(projekt.id, taetigkeit.id)"
                         />
                     </div>
                 </template>

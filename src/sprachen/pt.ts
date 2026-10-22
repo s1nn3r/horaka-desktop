@@ -51,6 +51,9 @@ export const pt: Texte = {
         kompakt: 'Vista compacta',
         breite: 'Alterar largura (setas)',
         gross: 'Vista completa',
+        notizHinzufuegen: 'Adicionar nota',
+        loeschen: 'Eliminar',
+        hoehe: 'Alterar altura (teclas de seta)',
     },
     abschluss: {
         titel: 'O que fizeste?',

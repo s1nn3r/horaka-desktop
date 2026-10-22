@@ -128,6 +128,13 @@ mockIPC(
                 abschluss = abschluss.filter((g) => g.id !== id);
                 return stand();
             }
+            case 'eintrag_verwerfen':
+                timer.entries = timer.entries.filter((e) => e.id !== (a.id as number));
+                timer = { ...timer, running: timer.entries.length > 0, count: timer.entries.length };
+                return stand();
+            // Das native Kontextmenü gibt es im Browser nicht, der Rechtsklick tut dort nichts.
+            case 'plugin:menu|new':
+                return [1, 'vorschau'];
             case 'abschluss_ueberspringen':
                 abschluss = abschluss.filter((g) => g.id !== (a.id as number));
                 return stand();

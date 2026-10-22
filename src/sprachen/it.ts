@@ -51,6 +51,9 @@ export const it: Texte = {
         kompakt: 'Vista compatta',
         breite: 'Cambia larghezza (tasti freccia)',
         gross: 'Vista completa',
+        notizHinzufuegen: 'Aggiungi nota',
+        loeschen: 'Elimina',
+        hoehe: 'Cambia altezza (tasti freccia)',
     },
     abschluss: {
         titel: 'Cosa hai fatto?',

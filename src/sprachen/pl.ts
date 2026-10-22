@@ -51,6 +51,9 @@ export const pl: Texte = {
         kompakt: 'Widok kompaktowy',
         breite: 'Zmień szerokość (strzałki)',
         gross: 'Pełny widok',
+        notizHinzufuegen: 'Dodaj notatkę',
+        loeschen: 'Usuń',
+        hoehe: 'Zmień wysokość (strzałki)',
     },
     abschluss: {
         titel: 'Co zrobiłeś?',

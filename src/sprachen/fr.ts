@@ -51,6 +51,9 @@ export const fr: Texte = {
         kompakt: 'Vue compacte',
         breite: 'Modifier la largeur (touches fléchées)',
         gross: 'Vue complète',
+        notizHinzufuegen: 'Ajouter une note',
+        loeschen: 'Supprimer',
+        hoehe: 'Modifier la hauteur (touches fléchées)',
     },
     abschluss: {
         titel: 'Qu’as-tu fait ?',

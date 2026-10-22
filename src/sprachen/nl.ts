@@ -51,6 +51,9 @@ export const nl: Texte = {
         kompakt: 'Compacte weergave',
         breite: 'Breedte wijzigen (pijltoetsen)',
         gross: 'Volledige weergave',
+        notizHinzufuegen: 'Notitie toevoegen',
+        loeschen: 'Verwijderen',
+        hoehe: 'Hoogte wijzigen (pijltoetsen)',
     },
     abschluss: {
         titel: 'Wat heb je gedaan?',

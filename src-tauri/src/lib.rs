@@ -636,6 +636,18 @@ async fn notiz_setzen(app: AppHandle, id: i64, notiz: String) -> Result<Stand, F
     Ok(stand(&app))
 }
 
+/// Laufenden Timer verwerfen (Kontextmenü), ohne Frage nach der Notiz.
+#[tauri::command]
+async fn eintrag_verwerfen(app: AppHandle, id: i64) -> Result<Stand, Fehler> {
+    api::verwerfen(id)
+        .await
+        .map_err(|e| fehler_behandeln(&app, e))?;
+    abgleichen(&app, false)
+        .await
+        .map_err(|e| fehler_behandeln(&app, e))?;
+    Ok(stand(&app))
+}
+
 #[tauri::command]
 fn abschluss_ueberspringen(app: AppHandle, id: i64) -> Stand {
     abschluss_erledigt(&app, id);
@@ -808,7 +820,7 @@ fn groesse_setzen(app: AppHandle, breite: f64, hoehe: f64) {
     let _ = w.set_always_on_top(true);
     let _ = w.set_size(LogicalSize::new(
         breite.clamp(160.0, 720.0),
-        hoehe.clamp(60.0, 720.0),
+        hoehe.clamp(60.0, 1000.0),
     ));
     in_sichtbaren_bereich(&w);
 }
@@ -866,6 +878,7 @@ pub fn run() {
             verbergen,
             app_oeffnen,
             notiz_setzen,
+            eintrag_verwerfen,
             abschluss_ueberspringen,
             einstellungen_lesen,
             einstellungen_speichern,

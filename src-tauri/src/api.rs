@@ -181,6 +181,11 @@ async fn anfrage<T: DeserializeOwned>(
         .map_err(|e| Fehler::neu("network", Some(e.to_string())))?;
     let status = antwort.status();
 
+    // 204 ohne Rumpf (Verwerfen): nur für T = () gedacht.
+    if status == reqwest::StatusCode::NO_CONTENT {
+        return serde_json::from_value(serde_json::Value::Null)
+            .map_err(|e| Fehler::neu("invalid_response", Some(e.to_string())));
+    }
     if status.is_success() {
         return antwort
             .json::<Huelle<T>>()
@@ -246,6 +251,16 @@ pub async fn notiz_setzen(id: i64, notiz: Option<String>) -> Result<Eintrag, Feh
         reqwest::Method::PATCH,
         &format!("track/entries/{id}"),
         Some(serde_json::json!({ "note": notiz })),
+    )
+    .await
+}
+
+/// Eigenen laufenden Timer ganz verwerfen (der Eintrag verschwindet).
+pub async fn verwerfen(id: i64) -> Result<(), Fehler> {
+    aufrufen(
+        reqwest::Method::DELETE,
+        &format!("track/entries/{id}"),
+        None,
     )
     .await
 }

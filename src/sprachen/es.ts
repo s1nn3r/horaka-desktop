@@ -51,6 +51,9 @@ export const es: Texte = {
         kompakt: 'Vista compacta',
         breite: 'Cambiar ancho (teclas de flecha)',
         gross: 'Vista completa',
+        notizHinzufuegen: 'Añadir nota',
+        loeschen: 'Eliminar',
+        hoehe: 'Cambiar la altura (teclas de flecha)',
     },
     abschluss: {
         titel: '¿Qué has hecho?',

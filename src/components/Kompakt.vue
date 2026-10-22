@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { alsFehler, appOeffnen, ausloesen, verbergen } from '../befehle';
+import { alsFehler, appOeffnen, ausloesen, eintragVerwerfen, verbergen } from '../befehle';
 import { t } from '../i18n';
-import type { Aktion, Auswahl, Fehler, Kombination, Projekt, Stand, Taetigkeit, Timer } from '../typen';
+import { kontextmenue } from '../kontext';
+import { useReihenfolge } from '../reihenfolge';
+import type { Aktion, Auswahl, Eintrag, Fehler, Kombination, Projekt, Stand, Taetigkeit, Timer } from '../typen';
 import { dauer, seit, useUhr } from '../zeit';
+import NotizFeld from './NotizFeld.vue';
 
 // Kompaktansicht: kleines Fenster, das offen bleibt. Alle Favoriten als
 // kleine quadratische Kacheln (ohne Favoriten die zuletzt verwendeten), auch
@@ -11,7 +14,8 @@ import { dauer, seit, useUhr } from '../zeit';
 // ob sie läuft. Ein laufender Timer ohne eigene Kachel steht darüber als
 // schmale Zeile. Ohne Kopfzeile: Symbole rechts in einer schmalen Spalte,
 // gezogen wird am grauen Rand (Optik wie die Flyouts von Windows 11).
-// Die Höhe folgt dem Inhalt (App.vue).
+// Die Höhe folgt dem Inhalt (App.vue). Rechtsklick öffnet das Menü aus
+// kontext.ts, Ziehen ordnet die Kacheln (eigene Reihenfolge, reihenfolge.ts).
 const props = defineProps<{ auswahl: Auswahl; timer: Timer | null; offline: boolean; spalten: number }>();
 const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; gross: []; spalten: [anzahl: number]; ziehen: [an: boolean] }>();
 
@@ -51,7 +55,9 @@ const laufende = computed(() =>
     }),
 );
 
-const kacheln = computed(() => {
+const reihenfolge = useReihenfolge('kompakt');
+
+const alleKacheln = computed(() => {
     const quelle: Kombination[] = props.auswahl.favorites.length > 0 ? props.auswahl.favorites : props.auswahl.recent.slice(0, 8);
     const gesehen = new Set<string>();
     return quelle.flatMap((k) => {
@@ -69,6 +75,7 @@ const kacheln = computed(() => {
         return [{ schluessel, projekt, taetigkeit, lauf }];
     });
 });
+const kacheln = computed(() => reihenfolge.ordnen(alleKacheln.value));
 
 // Laufende Timer, die keine Kachel zeigt.
 const ohneKachel = computed(() => {
@@ -80,18 +87,34 @@ function titel(projekt: Projekt | null, taetigkeit: Taetigkeit | null): string {
     return [projekt?.client_name, projekt?.name, taetigkeit?.name].filter(Boolean).join(' · ');
 }
 
-async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: number | null = null) {
+function aktion(was: Aktion, projekt: number | null = null, taetigkeit: number | null = null) {
+    return ausfuehren(() => ausloesen(was, projekt, taetigkeit));
+}
+
+async function ausfuehren(befehl: () => Promise<Stand>) {
     if (beschaeftigt.value) {
         return;
     }
     beschaeftigt.value = true;
     try {
-        emit('stand', await ausloesen(was, projekt, taetigkeit));
+        emit('stand', await befehl());
     } catch (e) {
         emit('fehler', alsFehler(e));
     } finally {
         beschaeftigt.value = false;
     }
+}
+
+// Notiz aus dem Kontextmenü: Feld über den Kacheln, bis gespeichert oder abgebrochen.
+const notizFuer = ref<Eintrag | null>(null);
+
+function menue(lauf: Eintrag | null, projekt: number, taetigkeit: number | null) {
+    kontextmenue(lauf, {
+        starten: () => void aktion('start', projekt, taetigkeit),
+        stoppen: () => void aktion('stop', projekt),
+        notiz: (e) => (notizFuer.value = e),
+        loeschen: (e) => void ausfuehren(() => eintragVerwerfen(e.id)),
+    });
 }
 </script>
 
@@ -109,6 +132,7 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
                 class="kachel-laufend kachel-streifen flex h-8 items-center gap-2 rounded-md pr-1 pl-3.5"
                 :style="{ '--farbe': l.projekt?.color ?? 'var(--primary)' }"
                 :title="titel(l.projekt, l.taetigkeit)"
+                @contextmenu.prevent="menue(l.eintrag, l.eintrag.project_id, l.eintrag.activity_id)"
             >
                 <span class="min-w-0 flex-1 truncate text-[12px]">{{ l.projekt?.name ?? `#${l.eintrag.project_id}` }}</span>
                 <span class="zeit-laufend text-[12px] font-semibold tabular-nums">{{ dauer(seit(l.eintrag.started_at, jetzt)) }}</span>
@@ -123,18 +147,32 @@ async function aktion(was: Aktion, projekt: number | null = null, taetigkeit: nu
                 </button>
             </div>
 
+            <NotizFeld
+                v-if="notizFuer"
+                :id="notizFuer.id"
+                :key="notizFuer.id"
+                :notiz="notizFuer.note"
+                offen-start
+                @zu="notizFuer = null"
+                @stand="emit('stand', $event)"
+                @fehler="emit('fehler', $event)"
+            />
+
             <!-- Favoriten als Kacheln wie Windows 11: Farbstreifen links, Name, darunter Tätigkeit (oder Kunde); laufend zart in der Projektfarbe getönt und umrandet, mit Dauer. -->
             <div v-if="kacheln.length > 0" data-tauri-drag-region class="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2">
                 <button
                     v-for="k in kacheln"
                     :key="k.schluessel"
+                    :data-schluessel="k.schluessel"
                     type="button"
-                    class="kachel-streifen flex h-12 min-w-0 flex-col justify-center gap-0.5 rounded-md pr-2.5 pl-3.5 text-left"
+                    class="kachel-streifen flex h-12 min-w-0 flex-col justify-center gap-0.5 rounded-md pr-2.5 pl-3.5 text-left select-none"
                     :class="k.lauf ? 'kachel-laufend' : 'bg-kachel shadow-[inset_0_0_0_var(--haarlinie)_var(--kante)] hover:bg-kachel-hover active:text-foreground/70'"
-                    :style="{ '--farbe': k.projekt.color }"
+                    :style="{ '--farbe': k.projekt.color, opacity: reihenfolge.ziehend.value === k.schluessel ? 0.5 : undefined }"
                     :disabled="beschaeftigt"
                     :title="`${titel(k.projekt, k.taetigkeit)} · ${k.lauf ? t.haupt.stoppen : t.haupt.starten}`"
                     @click="aktion(k.lauf ? 'stop' : 'start', k.projekt.id, k.taetigkeit?.id ?? null)"
+                    @contextmenu.prevent="menue(k.lauf?.eintrag ?? null, k.projekt.id, k.taetigkeit?.id ?? null)"
+                    @pointerdown="reihenfolge.an($event, k.schluessel, kacheln.map((x) => x.schluessel))"
                 >
                     <span class="truncate text-[12px] leading-4">{{ k.projekt.name }}</span>
                     <span v-if="k.lauf" class="zeit-laufend text-[11px] leading-4 font-semibold tabular-nums">{{ dauer(seit(k.lauf.eintrag.started_at, jetzt)) }}</span>

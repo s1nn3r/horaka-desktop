@@ -16,6 +16,7 @@ export const groesseSetzen = (breite: number, hoehe: number) => invoke<void>('gr
 export const appOeffnen = (pfad?: string) => invoke<void>('app_oeffnen', { pfad: pfad ?? null });
 
 export const notizSetzen = (id: number, notiz: string) => invoke<Stand>('notiz_setzen', { id, notiz });
+export const eintragVerwerfen = (id: number) => invoke<Stand>('eintrag_verwerfen', { id });
 export const abschlussUeberspringen = (id: number) => invoke<Stand>('abschluss_ueberspringen', { id });
 export const einstellungenLesen = () => invoke<Einstellungen>('einstellungen_lesen');
 export const einstellungenSpeichern = (neu: Einstellungen) => invoke<EinstellungenAntwort>('einstellungen_speichern', { neu });

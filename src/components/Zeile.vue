@@ -32,7 +32,7 @@ const unterzeile = computed(() => {
 </script>
 
 <template>
-    <div class="group flex min-h-11 items-center gap-2 rounded-lg px-2 hover:bg-muted">
+    <div class="group flex min-h-11 items-center gap-2 rounded-lg px-2 select-none hover:bg-muted">
         <span class="size-2.5 shrink-0 rounded-full" :style="{ background: projekt.color }" />
 
         <button

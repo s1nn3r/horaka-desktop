@@ -114,7 +114,42 @@ const mausRein = () => (drueber.value = true);
 const mausRaus = () => (drueber.value = false);
 
 const BREITE = 360;
-const HOEHE = 560;
+// Höhe der vollen Ansicht, unten am Anfasser ziehbar (in localStorage wie die Spalten).
+const HOEHE_MIN = 400;
+const HOEHE_MAX = 1000;
+function hoeheGemerkt(): number {
+    try {
+        const n = Number(localStorage.getItem('fenster-hoehe'));
+        return n >= HOEHE_MIN && n <= HOEHE_MAX ? n : 560;
+    } catch {
+        return 560;
+    }
+}
+const hoehe = ref(hoeheGemerkt());
+function hoeheSetzen(n: number) {
+    hoehe.value = Math.round(Math.min(HOEHE_MAX, Math.max(HOEHE_MIN, n)));
+    void groesseSetzen(BREITE, hoehe.value);
+    try {
+        localStorage.setItem('fenster-hoehe', String(hoehe.value));
+    } catch {
+        // Ohne Speicher gilt die Höhe nur bis zum Neustart.
+    }
+}
+let hoeheAb: { y: number; hoehe: number } | null = null;
+function hoeheAn(e: PointerEvent) {
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    hoeheAb = { y: e.screenY, hoehe: hoehe.value };
+    zieht.value = true;
+}
+function hoeheZiehen(e: PointerEvent) {
+    if (hoeheAb) {
+        hoeheSetzen(hoeheAb.hoehe + e.screenY - hoeheAb.y);
+    }
+}
+function hoeheAus() {
+    hoeheAb = null;
+    zieht.value = false;
+}
 // Kompakt: Breite in ganzen Kachelspalten (Kachel 112 px, Abstand 8 px; Innenrand
 // und Symbolspalte 56 px), am rechten Rand ziehbar; die Zeilen folgen daraus.
 // shortcut: Spaltenzahl nur in localStorage dieses Fensters, in einstellungen.json, falls sie mit umziehen soll.
@@ -149,7 +184,7 @@ watch(kompaktAktiv, async (an) => {
     beobachter?.disconnect();
     beobachter = null;
     if (!an) {
-        await groesseSetzen(BREITE, HOEHE);
+        await groesseSetzen(BREITE, hoehe.value);
         return;
     }
     await nextTick();
@@ -189,6 +224,8 @@ function taste(e: KeyboardEvent) {
 }
 
 onMounted(async () => {
+    // Gemerkte Höhe; die Kompaktansicht setzt ihre Größe danach selbst.
+    void groesseSetzen(BREITE, hoehe.value);
     window.addEventListener('keydown', taste);
     document.documentElement.addEventListener('mouseenter', mausRein);
     document.documentElement.addEventListener('mouseleave', mausRaus);
@@ -220,7 +257,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div ref="rahmen" class="flex flex-col overflow-hidden motion-reduce:transition-none"
+    <div ref="rahmen" class="relative flex flex-col overflow-hidden motion-reduce:transition-none"
         :class="[kompaktAktiv ? 'rounded-lg bg-flyout shadow-[inset_0_0_0_var(--haarlinie)_var(--linie)]' : 'h-full border border-border bg-background', vorschauDeckkraft === null ? 'transition-opacity duration-300 ease-out' : '']"
         :style="{ opacity: deckkraft }"
     >
@@ -301,5 +338,22 @@ onBeforeUnmount(() => {
             <span class="flex-1">{{ meldung }}</span>
             <button type="button" class="-mr-1 shrink-0 px-1 font-semibold" :title="t.haupt.schliessen" @click="meldung = null">×</button>
         </div>
+
+        <div
+            v-if="!kompaktAktiv"
+            role="separator"
+            aria-orientation="horizontal"
+            tabindex="0"
+            :aria-label="t.haupt.hoehe"
+            :aria-valuenow="hoehe"
+            class="absolute inset-x-0 bottom-0 h-1.5 cursor-ns-resize focus-visible:bg-ring/40"
+            @pointerdown="hoeheAn"
+            @pointermove="hoeheZiehen"
+            @pointerup="hoeheAus"
+            @pointercancel="hoeheAus"
+            @lostpointercapture="hoeheAus"
+            @keydown.up.prevent="hoeheSetzen(hoehe - 40)"
+            @keydown.down.prevent="hoeheSetzen(hoehe + 40)"
+        />
     </div>
 </template>

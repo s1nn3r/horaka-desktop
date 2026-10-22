@@ -52,6 +52,8 @@ export const nl: Texte = {
         breite: 'Breedte wijzigen (pijltoetsen)',
         gross: 'Volledige weergave',
         notizHinzufuegen: 'Notitie toevoegen',
+        startKorrigieren: 'Starttijd corrigeren…',
+        start: 'Gestart om',
         loeschen: 'Verwijderen',
         hoehe: 'Hoogte wijzigen (pijltoetsen)',
         vorschlaege: 'Suggesties uit eerdere notities',

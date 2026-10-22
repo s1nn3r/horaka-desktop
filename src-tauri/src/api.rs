@@ -1,7 +1,7 @@
 //! Zugang zur REST-API von Horaka (https://api.horaka.com/v1). Nur die
 //! Trigger-Endpunkte: `GET /track/choices`, `GET /timer` und
 //! `POST /track/{start,stop,switch}` mit Idempotency-Key und
-//! `PATCH /track/entries/{id}` für die Notiz. Woher der Token
+//! `PATCH /track/entries/{id}` für Notiz und Start. Woher der Token
 //! kommt (OAuth oder Gerätetoken) und wie er erneuert wird, regelt
 //! `zugang.rs`.
 
@@ -251,6 +251,17 @@ pub async fn notiz_setzen(id: i64, notiz: Option<String>) -> Result<Eintrag, Feh
         reqwest::Method::PATCH,
         &format!("track/entries/{id}"),
         Some(serde_json::json!({ "note": notiz })),
+    )
+    .await
+}
+
+/// Start eines eigenen Eintrags nachträglich korrigieren (`started_at`,
+/// ISO 8601); der Server rundet nach den Regeln des Workspace.
+pub async fn start_setzen(id: i64, start: String) -> Result<Eintrag, Fehler> {
+    aufrufen(
+        reqwest::Method::PATCH,
+        &format!("track/entries/{id}"),
+        Some(serde_json::json!({ "started_at": start })),
     )
     .await
 }

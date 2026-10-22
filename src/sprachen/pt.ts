@@ -52,6 +52,8 @@ export const pt: Texte = {
         breite: 'Alterar largura (setas)',
         gross: 'Vista completa',
         notizHinzufuegen: 'Adicionar nota',
+        startKorrigieren: 'Corrigir hora de início…',
+        start: 'Iniciado às',
         loeschen: 'Eliminar',
         hoehe: 'Alterar altura (teclas de seta)',
         vorschlaege: 'Sugestões de notas anteriores',

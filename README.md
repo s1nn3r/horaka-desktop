@@ -28,7 +28,7 @@ The macOS build is signed ad hoc and not notarised, so Gatekeeper blocks it the 
 - Search across client, project and activity, then favourites, recently used and all projects with their activities.
 - If parallel timers are turned on in your Horaka account, each project offers "Start in addition" and "Switch to this".
 - When you stop a timer, the window asks "What did you do?" and saves your answer as the note of the entry. This also happens after a stop from a shortcut or the tray menu, and you can turn it off.
-- Right-click a row for Start, or for a running timer Stop, Add note (jumps into its note field) and Delete. Drag favourites to rearrange them.
+- Right-click a row for Start, or for a running timer Stop, Add note (jumps into its note field), Correct start time and Delete. A start time is the last time of day it occurred, so 23:50 shortly after midnight means yesterday. Drag favourites to rearrange them.
 - Drag the bottom edge to make the window taller or shorter (400 to 1000 px, also with the arrow keys); it remembers the height.
 - The window opens at the icon and closes when you click elsewhere. Drag it by the header and it stays where you put it, even across restarts. If you unplug a monitor, the window moves to another screen and goes back to its own screen when the monitor returns.
 
@@ -43,7 +43,7 @@ A small window in the style of Windows 11 (grey background, light cards with a c
 
 The compact view can fade out while the mouse is elsewhere and come back when you hover over it. A slider sets the opacity while faded (10 to 90 percent), and the window previews it while you drag.
 
-Right-click a tile for Start, or for a running timer Stop, Add note and Delete (discards the entry). Drag tiles to rearrange them; the order is stored on this computer only, separately for the compact view and the full window, and does not change your favourites in Horaka.
+Right-click a tile for Start, or for a running timer Stop, Add note, Correct start time (shows a time field at the top) and Delete (discards the entry). Drag tiles to rearrange them; the order is stored on this computer only, separately for the compact view and the full window, and does not change your favourites in Horaka.
 
 <img src="docs/screenshots/compact-dark.png" width="432" alt="Compact view in dark mode">
 

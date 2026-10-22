@@ -52,6 +52,8 @@ export const fr: Texte = {
         breite: 'Modifier la largeur (touches fléchées)',
         gross: 'Vue complète',
         notizHinzufuegen: 'Ajouter une note',
+        startKorrigieren: 'Corriger l’heure de début…',
+        start: 'Démarré à',
         loeschen: 'Supprimer',
         hoehe: 'Modifier la hauteur (touches fléchées)',
         vorschlaege: 'Suggestions tirées des notes précédentes',

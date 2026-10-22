@@ -134,6 +134,9 @@ mockIPC(
                     .filter((z) => !da.includes(z.toLowerCase()))
                     .slice(0, 3);
             }
+            case 'start_setzen':
+                timer.entries = timer.entries.map((e) => (e.id === (a.id as number) ? { ...e, started_at: String(a.start) } : e));
+                return stand();
             case 'eintrag_verwerfen':
                 timer.entries = timer.entries.filter((e) => e.id !== (a.id as number));
                 timer = { ...timer, running: timer.entries.length > 0, count: timer.entries.length };

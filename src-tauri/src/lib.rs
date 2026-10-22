@@ -653,6 +653,19 @@ async fn notiz_vorschlaege(
         .map_err(|e| fehler_behandeln(&app, e))
 }
 
+/// Start eines laufenden Timers korrigieren (Kontextmenü), danach den
+/// Timer neu lesen, weil der Server den Start rundet.
+#[tauri::command]
+async fn start_setzen(app: AppHandle, id: i64, start: String) -> Result<Stand, Fehler> {
+    api::start_setzen(id, start)
+        .await
+        .map_err(|e| fehler_behandeln(&app, e))?;
+    abgleichen(&app, false)
+        .await
+        .map_err(|e| fehler_behandeln(&app, e))?;
+    Ok(stand(&app))
+}
+
 /// Laufenden Timer verwerfen (Kontextmenü), ohne Frage nach der Notiz.
 #[tauri::command]
 async fn eintrag_verwerfen(app: AppHandle, id: i64) -> Result<Stand, Fehler> {
@@ -903,6 +916,7 @@ pub fn run() {
             app_oeffnen,
             notiz_setzen,
             eintrag_verwerfen,
+            start_setzen,
             notiz_vorschlaege,
             abschluss_ueberspringen,
             einstellungen_lesen,

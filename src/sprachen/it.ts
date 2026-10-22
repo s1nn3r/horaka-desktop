@@ -52,6 +52,8 @@ export const it: Texte = {
         breite: 'Cambia larghezza (tasti freccia)',
         gross: 'Vista completa',
         notizHinzufuegen: 'Aggiungi nota',
+        startKorrigieren: 'Correggi ora di inizio…',
+        start: 'Avviato alle',
         loeschen: 'Elimina',
         hoehe: 'Cambia altezza (tasti freccia)',
         vorschlaege: 'Suggerimenti dalle note precedenti',

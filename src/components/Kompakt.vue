@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { alsFehler, appOeffnen, ausloesen, eintragVerwerfen, verbergen } from '../befehle';
 import { t } from '../i18n';
 import { kontextmenue } from '../kontext';
 import { useReihenfolge } from '../reihenfolge';
 import type { Aktion, Auswahl, Eintrag, Fehler, Kombination, Projekt, Stand, Taetigkeit, Timer } from '../typen';
 import { dauer, seit, useUhr } from '../zeit';
+import StartFeld from './StartFeld.vue';
 
 // Kompaktansicht: kleines Fenster, das offen bleibt. Alle Favoriten als
 // kleine quadratische Kacheln (ohne Favoriten die zuletzt verwendeten), auch
@@ -14,7 +15,8 @@ import { dauer, seit, useUhr } from '../zeit';
 // schmale Zeile. Ohne Kopfzeile: Symbole rechts in einer schmalen Spalte,
 // gezogen wird am grauen Rand (Optik wie die Flyouts von Windows 11).
 // Die Höhe folgt dem Inhalt (App.vue). Rechtsklick öffnet das Menü aus
-// kontext.ts, Ziehen ordnet die Kacheln (eigene Reihenfolge, reihenfolge.ts).
+// kontext.ts, Ziehen ordnet die Kacheln (eigene Reihenfolge, reihenfolge.ts);
+// „Startzeit korrigieren“ zeigt das Zeitfeld oben im Fenster.
 const props = defineProps<{ auswahl: Auswahl; timer: Timer | null; offline: boolean; spalten: number }>();
 const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; gross: []; spalten: [anzahl: number]; ziehen: [an: boolean]; notiz: [eintrag: Eintrag] }>();
 
@@ -104,12 +106,19 @@ async function ausfuehren(befehl: () => Promise<Stand>) {
     }
 }
 
+const startFuer = ref<Eintrag | null>(null);
+const startFeld = ref<InstanceType<typeof StartFeld> | null>(null);
+
 function menue(lauf: Eintrag | null, projekt: number, taetigkeit: number | null) {
     kontextmenue(lauf, {
         starten: () => void aktion('start', projekt, taetigkeit),
         stoppen: () => void aktion('stop', projekt),
         // Das Notizfenster (Abschluss) im großen Fenster, App.vue.
         notiz: (e) => emit('notiz', e),
+        start: (e) => {
+            startFuer.value = e;
+            void nextTick(() => startFeld.value?.oeffnen());
+        },
         loeschen: (e) => void ausfuehren(() => eintragVerwerfen(e.id)),
     });
 }
@@ -121,6 +130,18 @@ function menue(lauf: Eintrag | null, projekt: number, taetigkeit: number | null)
             <div v-if="offline" role="status" class="px-0.5 text-[11px] leading-tight text-muted-foreground">
                 {{ t.laden.offline }}
             </div>
+
+            <StartFeld
+                v-if="startFuer"
+                ref="startFeld"
+                :key="startFuer.id"
+                :id="startFuer.id"
+                :start="startFuer.started_at"
+                class="mt-0 px-0.5"
+                @stand="emit('stand', $event)"
+                @fehler="emit('fehler', $event)"
+                @zu="startFuer = null"
+            />
 
             <!-- Laufende Timer ohne eigene Kachel: eine schmale Zeile je Timer. -->
             <div

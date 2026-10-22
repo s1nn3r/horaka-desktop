@@ -52,6 +52,8 @@ export const pl: Texte = {
         breite: 'Zmień szerokość (strzałki)',
         gross: 'Pełny widok',
         notizHinzufuegen: 'Dodaj notatkę',
+        startKorrigieren: 'Popraw godzinę rozpoczęcia…',
+        start: 'Rozpoczęto o',
         loeschen: 'Usuń',
         hoehe: 'Zmień wysokość (strzałki)',
         vorschlaege: 'Propozycje z wcześniejszych notatek',

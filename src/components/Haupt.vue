@@ -8,6 +8,7 @@ import type { Aktion, Auswahl, Fehler, Kombination, Projekt, Stand, Taetigkeit, 
 import { dauer, seit, useUhr } from '../zeit';
 import Kopf from './Kopf.vue';
 import NotizFeld from './NotizFeld.vue';
+import StartFeld from './StartFeld.vue';
 import Zeile from './Zeile.vue';
 
 const props = defineProps<{ auswahl: Auswahl; timer: Timer | null; offline: boolean }>();
@@ -153,12 +154,23 @@ function notizOeffnen() {
     }
 }
 
+// Startzeit-Felder der laufenden Timer, geöffnet aus dem Kontextmenü.
+const startFelder = new Map<number, InstanceType<typeof StartFeld>>();
+function startFeldMerken(id: number, feld: unknown) {
+    if (feld) {
+        startFelder.set(id, feld as InstanceType<typeof StartFeld>);
+    } else {
+        startFelder.delete(id);
+    }
+}
+
 // Rechtsklick auf eine Zeile; „Notiz“ springt in das Feld unter dem laufenden Timer.
 function menue(projekt: number, taetigkeit: number | null, lauf = laufende.value.find((l) => l.eintrag.project_id === projekt && (taetigkeit === null || l.eintrag.activity_id === taetigkeit))?.eintrag) {
     kontextmenue(lauf ?? null, {
         starten: () => void aktion('start', projekt, taetigkeit),
         stoppen: () => void aktion('stop', projekt),
         notiz: (e) => notizFelder.get(e.id)?.oeffnen(),
+        start: (e) => startFelder.get(e.id)?.oeffnen(),
         loeschen: (e) => void ausfuehren(() => eintragVerwerfen(e.id)),
     });
 }
@@ -211,6 +223,13 @@ onBeforeUnmount(() => abmelden.forEach((fn) => fn()));
                 </button>
             </div>
             <div class="pl-[18px]">
+                <StartFeld
+                    :ref="(feld) => startFeldMerken(l.eintrag.id, feld)"
+                    :id="l.eintrag.id"
+                    :start="l.eintrag.started_at"
+                    @stand="emit('stand', $event)"
+                    @fehler="emit('fehler', $event)"
+                />
                 <NotizFeld
                     :ref="(feld) => notizFeldMerken(l.eintrag.id, feld)"
                     :id="l.eintrag.id"

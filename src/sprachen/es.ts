@@ -52,6 +52,8 @@ export const es: Texte = {
         breite: 'Cambiar ancho (teclas de flecha)',
         gross: 'Vista completa',
         notizHinzufuegen: 'Añadir nota',
+        startKorrigieren: 'Corregir hora de inicio…',
+        start: 'Iniciado a las',
         loeschen: 'Eliminar',
         hoehe: 'Cambiar la altura (teclas de flecha)',
         vorschlaege: 'Sugerencias de notas anteriores',

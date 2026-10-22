@@ -6,7 +6,6 @@ import { kontextmenue } from '../kontext';
 import { useReihenfolge } from '../reihenfolge';
 import type { Aktion, Auswahl, Eintrag, Fehler, Kombination, Projekt, Stand, Taetigkeit, Timer } from '../typen';
 import { dauer, seit, useUhr } from '../zeit';
-import NotizFeld from './NotizFeld.vue';
 
 // Kompaktansicht: kleines Fenster, das offen bleibt. Alle Favoriten als
 // kleine quadratische Kacheln (ohne Favoriten die zuletzt verwendeten), auch
@@ -17,7 +16,7 @@ import NotizFeld from './NotizFeld.vue';
 // Die Höhe folgt dem Inhalt (App.vue). Rechtsklick öffnet das Menü aus
 // kontext.ts, Ziehen ordnet die Kacheln (eigene Reihenfolge, reihenfolge.ts).
 const props = defineProps<{ auswahl: Auswahl; timer: Timer | null; offline: boolean; spalten: number }>();
-const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; gross: []; spalten: [anzahl: number]; ziehen: [an: boolean] }>();
+const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; gross: []; spalten: [anzahl: number]; ziehen: [an: boolean]; notiz: [eintrag: Eintrag] }>();
 
 // Griff am rechten Rand: Ziehen ändert die Spaltenzahl (je 120 px eine),
 // App.vue setzt daraus Breite und Höhe.
@@ -105,14 +104,12 @@ async function ausfuehren(befehl: () => Promise<Stand>) {
     }
 }
 
-// Notiz aus dem Kontextmenü: Feld über den Kacheln, bis gespeichert oder abgebrochen.
-const notizFuer = ref<Eintrag | null>(null);
-
 function menue(lauf: Eintrag | null, projekt: number, taetigkeit: number | null) {
     kontextmenue(lauf, {
         starten: () => void aktion('start', projekt, taetigkeit),
         stoppen: () => void aktion('stop', projekt),
-        notiz: (e) => (notizFuer.value = e),
+        // Das Notizfenster (Abschluss) im großen Fenster, App.vue.
+        notiz: (e) => emit('notiz', e),
         loeschen: (e) => void ausfuehren(() => eintragVerwerfen(e.id)),
     });
 }
@@ -146,19 +143,6 @@ function menue(lauf: Eintrag | null, projekt: number, taetigkeit: number | null)
                     <svg viewBox="0 0 16 16" class="size-2.5" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="2" fill="currentColor" /></svg>
                 </button>
             </div>
-
-            <NotizFeld
-                v-if="notizFuer"
-                :id="notizFuer.id"
-                :key="notizFuer.id"
-                :notiz="notizFuer.note"
-                :projekt="notizFuer.project_id"
-                :taetigkeit="notizFuer.activity_id"
-                offen-start
-                @zu="notizFuer = null"
-                @stand="emit('stand', $event)"
-                @fehler="emit('fehler', $event)"
-            />
 
             <!-- Favoriten als Kacheln wie Windows 11: Farbstreifen links, Name, darunter Tätigkeit (oder Kunde); laufend zart in der Projektfarbe getönt und umrandet, mit Dauer. -->
             <div v-if="kacheln.length > 0" data-tauri-drag-region class="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2">

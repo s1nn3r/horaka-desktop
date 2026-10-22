@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { nextTick, ref } from 'vue';
 import { alsFehler, notizSetzen } from '../befehle';
 import { t } from '../i18n';
 import type { Fehler, Stand } from '../typen';
 import Vorschlaege from './Vorschlaege.vue';
 
 // Notiz am laufenden Timer: zeigt sie, ein Klick öffnet das Feld. Enter
-// speichert, Umschalt+Enter macht eine neue Zeile, Esc bricht ab. Mit
-// `offenStart` (Kompaktansicht) gleich offen, `zu` meldet das Schließen.
-const props = defineProps<{ id: number; notiz: string | null; projekt: number; taetigkeit: number | null; offenStart?: boolean }>();
-const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; zu: [] }>();
+// speichert, Umschalt+Enter macht eine neue Zeile, Esc bricht ab.
+const props = defineProps<{ id: number; notiz: string | null; projekt: number; taetigkeit: number | null }>();
+const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler] }>();
 
 const offen = ref(false);
 const text = ref('');
@@ -55,9 +54,6 @@ function taste(e: KeyboardEvent) {
     }
 }
 
-watch(offen, (an) => !an && emit('zu'));
-onMounted(() => props.offenStart && oeffnen());
-
 defineExpose({ oeffnen });
 </script>
 
@@ -75,9 +71,9 @@ defineExpose({ oeffnen });
                 class="w-full resize-none rounded-lg border border-border bg-background px-2.5 py-1.5 text-[13px] outline-none focus:border-primary"
                 @keydown="taste"
             />
-            <Vorschlaege v-model="text" :projekt="projekt" :taetigkeit="taetigkeit" />
-            <div class="mt-1 flex items-center gap-2">
-                <span class="flex-1 text-[11px] text-muted-foreground">{{ t.haupt.notizHinweis }}</span>
+            <p class="text-[11px] text-muted-foreground">{{ t.haupt.notizHinweis }}</p>
+            <Vorschlaege v-model="text" class="mt-1.5" :projekt="projekt" :taetigkeit="taetigkeit" />
+            <div class="mt-1.5 flex items-center justify-end gap-2">
                 <button type="button" class="h-7 rounded-md px-2 text-[12px] font-medium text-muted-foreground hover:bg-muted" @click="offen = false">
                     {{ t.haupt.abbrechen }}
                 </button>

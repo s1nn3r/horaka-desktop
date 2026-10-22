@@ -24,7 +24,7 @@ import Laden from './components/Laden.vue';
 import Verbinden from './components/Verbinden.vue';
 import { fehlertext, mit, t } from './i18n';
 import { themaAnwenden } from './thema';
-import type { Einstellungen, Fehler, Stand } from './typen';
+import type { Eintrag, Einstellungen, Fehler, Gestoppt, Stand } from './typen';
 
 const stand = ref<Stand | null>(null);
 const einstellungen = ref<Einstellungen | null>(null);
@@ -84,10 +84,23 @@ function kompaktSetzen(an: boolean) {
     }
 }
 
+// Notiz eines laufenden Timers aus dem Kontextmenü der Kompaktansicht: im
+// Notizfenster (Abschluss) des großen Fensters, danach wieder kompakt.
+const notizEintrag = ref<Gestoppt | null>(null);
+function notizOeffnen(e: Eintrag) {
+    const sekunden = Math.floor((Date.now() - Date.parse(e.started_at)) / 1000);
+    notizEintrag.value = { id: e.id, project_id: e.project_id, activity_id: e.activity_id, note: e.note, sekunden };
+}
+function notizFertig(neu: Stand) {
+    notizEintrag.value = null;
+    uebernehmen(neu);
+}
+
 // Kompakt nur in der Hauptansicht mit Daten; Einstellungen, Verbinden und die
 // Frage nach der Notiz brauchen das große Fenster.
 const kompaktAktiv = computed(
     () =>
+        !notizEintrag.value &&
         !!einstellungen.value?.kompakt &&
         !!stand.value?.verbunden &&
         !!stand.value.auswahl &&
@@ -215,7 +228,9 @@ async function aktualisieren() {
 
 function taste(e: KeyboardEvent) {
     if (e.key === 'Escape') {
-        if (ansicht.value === 'einstellungen') {
+        if (notizEintrag.value) {
+            notizEintrag.value = null;
+        } else if (ansicht.value === 'einstellungen') {
             ansicht.value = 'haupt';
         } else {
             void verbergen();
@@ -278,6 +293,17 @@ onBeforeUnmount(() => {
                 @aendern="einstellungenAendern"
             />
             <Abschluss
+                v-else-if="notizEintrag"
+                :key="`notiz-${notizEintrag.id}`"
+                :abschluss="[notizEintrag]"
+                :auswahl="stand.auswahl"
+                laufend
+                @stand="notizFertig"
+                @fehler="zeigeFehler"
+                @abbrechen="notizEintrag = null"
+                @einstellungen="ansicht = 'einstellungen'"
+            />
+            <Abschluss
                 v-else-if="stand.abschluss.length > 0"
                 :abschluss="stand.abschluss"
                 :auswahl="stand.auswahl"
@@ -297,6 +323,7 @@ onBeforeUnmount(() => {
                 @gross="kompaktSetzen(false)"
                 @spalten="spaltenSetzen"
                 @ziehen="zieht = $event"
+                @notiz="notizOeffnen"
             />
             <Haupt
                 v-else-if="stand.auswahl"

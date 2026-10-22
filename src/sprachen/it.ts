@@ -58,6 +58,7 @@ export const it: Texte = {
     },
     abschluss: {
         titel: 'Cosa hai fatto?',
+        titelLaufend: 'Su cosa stai lavorando?',
         erfasst: ':dauer registrate',
         von: ':nr di :anzahl',
         platzhalter: 'Un breve riepilogo, finisce come nota sulla registrazione',

@@ -70,7 +70,7 @@ function taste(e: KeyboardEvent) {
     <Kopf @einstellungen="emit('einstellungen')" />
     <main v-if="aktuell" class="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
         <div class="flex items-baseline justify-between gap-2">
-            <h1 class="text-base font-semibold">{{ t.abschluss.titel }}</h1>
+            <h1 class="text-base font-semibold">{{ laufend ? t.abschluss.titelLaufend : t.abschluss.titel }}</h1>
             <span v-if="anzahl > 1" class="text-[12px] text-muted-foreground">{{ mit(t.abschluss.von, { nr: nummer, anzahl }) }}</span>
         </div>
 
@@ -89,7 +89,7 @@ function taste(e: KeyboardEvent) {
             rows="5"
             maxlength="2000"
             :placeholder="t.abschluss.platzhalter"
-            :aria-label="t.abschluss.titel"
+            :aria-label="laufend ? t.abschluss.titelLaufend : t.abschluss.titel"
             :disabled="speichert"
             class="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 outline-none focus:border-primary"
             @keydown="taste"

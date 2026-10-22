@@ -58,6 +58,7 @@ export const es: Texte = {
     },
     abschluss: {
         titel: '¿Qué has hecho?',
+        titelLaufend: '¿En qué estás trabajando?',
         erfasst: ':dauer registrado',
         von: ':nr de :anzahl',
         platzhalter: 'Un resumen breve, guardado como nota del registro',

@@ -11,16 +11,27 @@ import { t } from '../i18n';
 const props = defineProps<{ projekt: number; taetigkeit: number | null }>();
 const notiz = defineModel<string>({ required: true });
 
+// Mit der Notiz im Feld: was schon drinsteht, ersetzt der Server durch die
+// nächsten. Geladen beim Öffnen und nach jedem Klick auf eine Pille.
 const vorschlaege = ref<string[]>([]);
-watch(
-    () => [props.projekt, props.taetigkeit] as const,
-    async ([projekt, taetigkeit]) => {
-        vorschlaege.value = [];
-        try {
-            vorschlaege.value = await notizVorschlaege(projekt, taetigkeit);
-        } catch {
-            // Ohne Netz keine Vorschläge.
+let anfrage = 0;
+// `text` direkt nach einem Klick: das Modell zeigt den neuen Wert erst nach dem Rendern.
+async function laden(text = notiz.value) {
+    const nr = ++anfrage;
+    try {
+        const neu = await notizVorschlaege(props.projekt, props.taetigkeit, text);
+        if (nr === anfrage) {
+            vorschlaege.value = neu;
         }
+    } catch {
+        // Ohne Netz bleiben die bisherigen.
+    }
+}
+watch(
+    () => [props.projekt, props.taetigkeit],
+    () => {
+        vorschlaege.value = [];
+        void laden();
     },
     { immediate: true },
 );
@@ -32,7 +43,9 @@ const offen = computed(() => {
 
 function uebernehmen(zeile: string) {
     const bisher = notiz.value.trimEnd();
-    notiz.value = bisher === '' ? zeile : `${bisher}\n${zeile}`;
+    const neu = bisher === '' ? zeile : `${bisher}\n${zeile}`;
+    notiz.value = neu;
+    void laden(neu);
 }
 </script>
 

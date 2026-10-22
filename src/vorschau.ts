@@ -128,8 +128,12 @@ mockIPC(
                 abschluss = abschluss.filter((g) => g.id !== id);
                 return stand();
             }
-            case 'notiz_vorschlaege':
-                return ['Workshop vorbereitet', 'Folien an Frau Müller verschickt, Rückmeldung bis Freitag', 'Abstimmung Startseite'];
+            case 'notiz_vorschlaege': {
+                const da = String(a.notiz ?? '').toLowerCase().split('\n');
+                return ['Workshop vorbereitet', 'Folien an Frau Müller verschickt, Rückmeldung bis Freitag', 'Abstimmung Startseite', 'Telefonat', 'Code-Review']
+                    .filter((z) => !da.includes(z.toLowerCase()))
+                    .slice(0, 3);
+            }
             case 'eintrag_verwerfen':
                 timer.entries = timer.entries.filter((e) => e.id !== (a.id as number));
                 timer = { ...timer, running: timer.entries.length > 0, count: timer.entries.length };

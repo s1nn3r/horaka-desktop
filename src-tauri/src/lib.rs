@@ -340,13 +340,7 @@ pub fn fenster_zeigen(app: &AppHandle) {
             let _ = w.set_position(PhysicalPosition::new(x, y));
         }
         None => {
-            // macOS: Menüleiste oben, das Fenster hängt darunter;
-            // Windows: Taskleiste unten, das Fenster steht darüber.
-            #[cfg(target_os = "macos")]
-            let platz = Position::TrayCenter;
-            #[cfg(not(target_os = "macos"))]
-            let platz = Position::TrayBottomCenter;
-            if w.move_window(platz).is_err() {
+            if an_symbol_setzen(&w).is_err() {
                 let _ = w.center();
             }
         }
@@ -356,6 +350,16 @@ pub fn fenster_zeigen(app: &AppHandle) {
     let _ = w.show();
     let _ = w.set_focus();
     let _ = app.emit("gezeigt", ());
+}
+
+/// macOS: Menüleiste oben, das Fenster hängt darunter; Windows: Taskleiste
+/// unten, das Fenster steht darüber.
+fn an_symbol_setzen(w: &WebviewWindow) -> tauri::Result<()> {
+    #[cfg(target_os = "macos")]
+    let platz = Position::TrayCenter;
+    #[cfg(not(target_os = "macos"))]
+    let platz = Position::TrayBottomCenter;
+    w.move_window(platz)
 }
 
 /// Schiebt das Fenster ganz in den nutzbaren Bereich seines Bildschirms
@@ -642,8 +646,9 @@ async fn notiz_vorschlaege(
     app: AppHandle,
     projekt: i64,
     taetigkeit: Option<i64>,
+    notiz: String,
 ) -> Result<Vec<String>, Fehler> {
-    api::notizvorschlaege(projekt, taetigkeit)
+    api::notizvorschlaege(projekt, taetigkeit, &notiz)
         .await
         .map_err(|e| fehler_behandeln(&app, e))
 }
@@ -834,6 +839,13 @@ fn groesse_setzen(app: AppHandle, breite: f64, hoehe: f64) {
         breite.clamp(160.0, 720.0),
         hoehe.clamp(60.0, 1000.0),
     ));
+    // Am Symbol (nicht gezogen, nicht kompakt) bleibt das Fenster an der
+    // Taskleiste, wenn es niedriger wird (Notizfenster nach Inhalt).
+    let z = app.state::<Zustand>();
+    let am_symbol = z.ort.lock().unwrap().is_none() && !z.einstellungen.lock().unwrap().kompakt;
+    if am_symbol {
+        let _ = an_symbol_setzen(&w);
+    }
     in_sichtbaren_bereich(&w);
 }
 

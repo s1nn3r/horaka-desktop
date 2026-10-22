@@ -186,14 +186,16 @@ function spaltenSetzen(n: number) {
         // Ohne Speicher gilt die Breite nur bis zum Neustart.
     }
 }
-watch(spalten, () => {
-    if (kompaktAktiv.value && rahmen.value) {
-        void groesseSetzen(kompaktBreite.value, Math.ceil(rahmen.value.getBoundingClientRect().height));
-    }
-});
+// Kompaktansicht und Notizfenster (Abschluss) sind so hoch wie ihr Inhalt,
+// sonst gilt die gemerkte Höhe.
+const abschlussAktiv = computed(
+    () => !!stand.value?.verbunden && ansicht.value === 'haupt' && (!!notizEintrag.value || stand.value.abschluss.length > 0),
+);
+const inhaltHoch = computed(() => kompaktAktiv.value || abschlussAktiv.value);
+const fensterBreite = computed(() => (kompaktAktiv.value ? kompaktBreite.value : BREITE));
 let beobachter: ResizeObserver | null = null;
 
-watch(kompaktAktiv, async (an) => {
+watch([inhaltHoch, fensterBreite], async ([an]) => {
     beobachter?.disconnect();
     beobachter = null;
     if (!an) {
@@ -202,8 +204,8 @@ watch(kompaktAktiv, async (an) => {
     }
     await nextTick();
     if (rahmen.value) {
-        // Höhe folgt dem Inhalt (laufende Timer, Meldungen).
-        beobachter = new ResizeObserver(([e]) => void groesseSetzen(kompaktBreite.value, Math.ceil(e.target.getBoundingClientRect().height)));
+        // Höhe folgt dem Inhalt (laufende Timer, Meldungen); meldet sich auch gleich beim Beobachten.
+        beobachter = new ResizeObserver(([e]) => void groesseSetzen(fensterBreite.value, Math.ceil(e.target.getBoundingClientRect().height)));
         beobachter.observe(rahmen.value);
     }
 });
@@ -273,7 +275,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div ref="rahmen" class="relative flex flex-col overflow-hidden motion-reduce:transition-none"
-        :class="[kompaktAktiv ? 'rounded-lg bg-flyout shadow-[inset_0_0_0_var(--haarlinie)_var(--linie)]' : 'h-full border border-border bg-background', vorschauDeckkraft === null ? 'transition-opacity duration-300 ease-out' : '']"
+        :class="[kompaktAktiv ? 'rounded-lg bg-flyout shadow-[inset_0_0_0_var(--haarlinie)_var(--linie)]' : 'border border-border bg-background', inhaltHoch ? '' : 'h-full', vorschauDeckkraft === null ? 'transition-opacity duration-300 ease-out' : '']"
         :style="{ opacity: deckkraft }"
     >
         <template v-if="stand && einstellungen">
@@ -367,7 +369,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div
-            v-if="!kompaktAktiv"
+            v-if="!inhaltHoch"
             role="separator"
             aria-orientation="horizontal"
             tabindex="0"

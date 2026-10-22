@@ -58,6 +58,7 @@ export const pl: Texte = {
     },
     abschluss: {
         titel: 'Co zrobiłeś?',
+        titelLaufend: 'Nad czym teraz pracujesz?',
         erfasst: 'Zarejestrowano :dauer',
         von: ':nr z :anzahl',
         platzhalter: 'Krótkie podsumowanie, trafi jako notatka do wpisu',

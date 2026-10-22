@@ -255,6 +255,18 @@ pub async fn notiz_setzen(id: i64, notiz: Option<String>) -> Result<Eintrag, Feh
     .await
 }
 
+/// Für Werte in der Adresse: alles außer A-Z, a-z, 0-9 und -._~ als %XX.
+fn prozentkodiert(text: &str) -> String {
+    text.bytes()
+        .map(|b| match b {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'.' | b'_' | b'~' => {
+                (b as char).to_string()
+            }
+            _ => format!("%{b:02X}"),
+        })
+        .collect()
+}
+
 /// Eigenen laufenden Timer ganz verwerfen (der Eintrag verschwindet).
 pub async fn verwerfen(id: i64) -> Result<(), Fehler> {
     aufrufen(
@@ -265,15 +277,21 @@ pub async fn verwerfen(id: i64) -> Result<(), Fehler> {
     .await
 }
 
-/// Vorschläge für das Notizfeld: zuletzt genutzte Zeilen aus eigenen
-/// Notizen des Projekts (mit Tätigkeit nur dieser).
+/// Vorschläge für das Notizfeld: zuletzt und häufig genutzte Zeilen aus
+/// eigenen Notizen des Projekts (mit Tätigkeit nur dieser); Zeilen aus
+/// `notiz` (schon im Feld) ersetzt der Server durch die nächsten.
 pub async fn notizvorschlaege(
     projekt: i64,
     taetigkeit: Option<i64>,
+    notiz: &str,
 ) -> Result<Vec<String>, Fehler> {
     let mut pfad = format!("track/note-suggestions?project={projekt}");
     if let Some(t) = taetigkeit {
         pfad.push_str(&format!("&activity={t}"));
+    }
+    if !notiz.trim().is_empty() {
+        pfad.push_str("&note=");
+        pfad.push_str(&prozentkodiert(notiz.trim()));
     }
     aufrufen(reqwest::Method::GET, &pfad, None).await
 }
@@ -303,4 +321,12 @@ pub async fn ausloesen(
         Some(serde_json::Value::Object(rumpf)),
     )
     .await
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn prozentkodiert() {
+        assert_eq!(super::prozentkodiert("Ä b&c\nd"), "%C3%84%20b%26c%0Ad");
+    }
 }

@@ -54,6 +54,7 @@ export const nl: Texte = {
         notizHinzufuegen: 'Notitie toevoegen',
         loeschen: 'Verwijderen',
         hoehe: 'Hoogte wijzigen (pijltoetsen)',
+        vorschlaege: 'Suggesties uit eerdere notities',
     },
     abschluss: {
         titel: 'Wat heb je gedaan?',

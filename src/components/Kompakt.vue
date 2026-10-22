@@ -152,6 +152,8 @@ function menue(lauf: Eintrag | null, projekt: number, taetigkeit: number | null)
                 :id="notizFuer.id"
                 :key="notizFuer.id"
                 :notiz="notizFuer.note"
+                :projekt="notizFuer.project_id"
+                :taetigkeit="notizFuer.activity_id"
                 offen-start
                 @zu="notizFuer = null"
                 @stand="emit('stand', $event)"

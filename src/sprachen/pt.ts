@@ -54,6 +54,7 @@ export const pt: Texte = {
         notizHinzufuegen: 'Adicionar nota',
         loeschen: 'Eliminar',
         hoehe: 'Alterar altura (teclas de seta)',
+        vorschlaege: 'Sugestões de notas anteriores',
     },
     abschluss: {
         titel: 'O que fizeste?',

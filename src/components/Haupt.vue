@@ -215,6 +215,8 @@ onBeforeUnmount(() => abmelden.forEach((fn) => fn()));
                     :ref="(feld) => notizFeldMerken(l.eintrag.id, feld)"
                     :id="l.eintrag.id"
                     :notiz="l.eintrag.note"
+                    :projekt="l.eintrag.project_id"
+                    :taetigkeit="l.eintrag.activity_id"
                     @stand="emit('stand', $event)"
                     @fehler="emit('fehler', $event)"
                 />

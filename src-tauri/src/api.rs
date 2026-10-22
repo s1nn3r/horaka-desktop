@@ -265,6 +265,19 @@ pub async fn verwerfen(id: i64) -> Result<(), Fehler> {
     .await
 }
 
+/// Vorschläge für das Notizfeld: zuletzt genutzte Zeilen aus eigenen
+/// Notizen des Projekts (mit Tätigkeit nur dieser).
+pub async fn notizvorschlaege(
+    projekt: i64,
+    taetigkeit: Option<i64>,
+) -> Result<Vec<String>, Fehler> {
+    let mut pfad = format!("track/note-suggestions?project={projekt}");
+    if let Some(t) = taetigkeit {
+        pfad.push_str(&format!("&activity={t}"));
+    }
+    aufrufen(reqwest::Method::GET, &pfad, None).await
+}
+
 /// `aktion` ist start, stop oder switch. Ohne Projekt stoppt stop alle
 /// laufenden Timer.
 pub async fn ausloesen(

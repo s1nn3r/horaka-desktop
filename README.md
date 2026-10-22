@@ -24,6 +24,7 @@ The macOS build is signed ad hoc and not notarised, so Gatekeeper blocks it the 
 ### Main window
 
 - Running timers with a live duration and a note field. Enter saves the note, Shift+Enter adds a line, Esc cancels.
+- Below every note field, small chips suggest lines from your recent notes on the same project and activity, without duplicates. A click adds the full line at the bottom.
 - Search across client, project and activity, then favourites, recently used and all projects with their activities.
 - If parallel timers are turned on in your Horaka account, each project offers "Start in addition" and "Switch to this".
 - When you stop a timer, the window asks "What did you do?" and saves your answer as the note of the entry. This also happens after a stop from a shortcut or the tray menu, and you can turn it off.

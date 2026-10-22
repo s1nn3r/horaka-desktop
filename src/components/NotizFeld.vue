@@ -3,11 +3,12 @@ import { nextTick, onMounted, ref, watch } from 'vue';
 import { alsFehler, notizSetzen } from '../befehle';
 import { t } from '../i18n';
 import type { Fehler, Stand } from '../typen';
+import Vorschlaege from './Vorschlaege.vue';
 
 // Notiz am laufenden Timer: zeigt sie, ein Klick öffnet das Feld. Enter
 // speichert, Umschalt+Enter macht eine neue Zeile, Esc bricht ab. Mit
 // `offenStart` (Kompaktansicht) gleich offen, `zu` meldet das Schließen.
-const props = defineProps<{ id: number; notiz: string | null; offenStart?: boolean }>();
+const props = defineProps<{ id: number; notiz: string | null; projekt: number; taetigkeit: number | null; offenStart?: boolean }>();
 const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; zu: [] }>();
 
 const offen = ref(false);
@@ -74,6 +75,7 @@ defineExpose({ oeffnen });
                 class="w-full resize-none rounded-lg border border-border bg-background px-2.5 py-1.5 text-[13px] outline-none focus:border-primary"
                 @keydown="taste"
             />
+            <Vorschlaege v-model="text" :projekt="projekt" :taetigkeit="taetigkeit" />
             <div class="mt-1 flex items-center gap-2">
                 <span class="flex-1 text-[11px] text-muted-foreground">{{ t.haupt.notizHinweis }}</span>
                 <button type="button" class="h-7 rounded-md px-2 text-[12px] font-medium text-muted-foreground hover:bg-muted" @click="offen = false">

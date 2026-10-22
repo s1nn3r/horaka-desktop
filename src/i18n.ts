@@ -63,6 +63,7 @@ const de = {
         notizHinzufuegen: 'Notiz hinzufügen',
         loeschen: 'Löschen',
         hoehe: 'Höhe ändern (Pfeiltasten)',
+        vorschlaege: 'Vorschläge aus früheren Notizen',
     },
     abschluss: {
         titel: 'Was hast du gemacht?',
@@ -211,6 +212,7 @@ const en: Texte = {
         notizHinzufuegen: 'Add note',
         loeschen: 'Delete',
         hoehe: 'Change height (arrow keys)',
+        vorschlaege: 'Suggestions from earlier notes',
     },
     abschluss: {
         titel: 'What did you do?',

@@ -5,6 +5,7 @@ import { mit, t } from '../i18n';
 import type { Auswahl, Fehler, Gestoppt, Stand } from '../typen';
 import { dauer } from '../zeit';
 import Kopf from './Kopf.vue';
+import Vorschlaege from './Vorschlaege.vue';
 
 // Nach dem Stoppen: „Was hast du gemacht?“ für jeden gestoppten Eintrag
 // nacheinander, vorbefüllt mit der Notiz, die er schon hatte.
@@ -87,6 +88,7 @@ function taste(e: KeyboardEvent) {
             class="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 outline-none focus:border-primary"
             @keydown="taste"
         />
+        <Vorschlaege v-model="text" class="-mt-2" :projekt="aktuell.project_id" :taetigkeit="aktuell.activity_id" />
         <p class="-mt-1 text-[11px] text-muted-foreground">{{ t.abschluss.hinweis }}</p>
 
         <button type="button" class="h-10 rounded-lg bg-primary font-medium text-primary-foreground disabled:opacity-50" :disabled="speichert" @click="weiter(true)">

@@ -54,6 +54,7 @@ export const it: Texte = {
         notizHinzufuegen: 'Aggiungi nota',
         loeschen: 'Elimina',
         hoehe: 'Cambia altezza (tasti freccia)',
+        vorschlaege: 'Suggerimenti dalle note precedenti',
     },
     abschluss: {
         titel: 'Cosa hai fatto?',

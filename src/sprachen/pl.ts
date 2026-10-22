@@ -54,6 +54,7 @@ export const pl: Texte = {
         notizHinzufuegen: 'Dodaj notatkę',
         loeschen: 'Usuń',
         hoehe: 'Zmień wysokość (strzałki)',
+        vorschlaege: 'Propozycje z wcześniejszych notatek',
     },
     abschluss: {
         titel: 'Co zrobiłeś?',

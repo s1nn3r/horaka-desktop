@@ -54,6 +54,7 @@ export const fr: Texte = {
         notizHinzufuegen: 'Ajouter une note',
         loeschen: 'Supprimer',
         hoehe: 'Modifier la hauteur (touches fléchées)',
+        vorschlaege: 'Suggestions tirées des notes précédentes',
     },
     abschluss: {
         titel: 'Qu’as-tu fait ?',

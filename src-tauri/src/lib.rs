@@ -636,6 +636,18 @@ async fn notiz_setzen(app: AppHandle, id: i64, notiz: String) -> Result<Stand, F
     Ok(stand(&app))
 }
 
+/// Vorschläge unter dem Notizfeld (Pillen zum Anklicken).
+#[tauri::command]
+async fn notiz_vorschlaege(
+    app: AppHandle,
+    projekt: i64,
+    taetigkeit: Option<i64>,
+) -> Result<Vec<String>, Fehler> {
+    api::notizvorschlaege(projekt, taetigkeit)
+        .await
+        .map_err(|e| fehler_behandeln(&app, e))
+}
+
 /// Laufenden Timer verwerfen (Kontextmenü), ohne Frage nach der Notiz.
 #[tauri::command]
 async fn eintrag_verwerfen(app: AppHandle, id: i64) -> Result<Stand, Fehler> {
@@ -879,6 +891,7 @@ pub fn run() {
             app_oeffnen,
             notiz_setzen,
             eintrag_verwerfen,
+            notiz_vorschlaege,
             abschluss_ueberspringen,
             einstellungen_lesen,
             einstellungen_speichern,

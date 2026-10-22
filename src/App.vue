@@ -215,6 +215,13 @@ async function nichtMehrFragen() {
     if (einstellungen.value) {
         await einstellungenAendern({ ...einstellungen.value, notiz_beim_stoppen: false });
     }
+    await abschlussSchliessen();
+}
+
+// Esc im Notizfenster: ohne Notiz weiter für alle offenen Fragen, zurück zur
+// vorigen Ansicht (kompakt oder voll; hatte erst die Frage das Fenster
+// geöffnet, geht es wieder zu, siehe abschluss_erledigt in Rust).
+async function abschlussSchliessen() {
     for (const g of stand.value?.abschluss ?? []) {
         uebernehmen(await abschlussUeberspringen(g.id));
     }
@@ -234,6 +241,8 @@ function taste(e: KeyboardEvent) {
             notizEintrag.value = null;
         } else if (ansicht.value === 'einstellungen') {
             ansicht.value = 'haupt';
+        } else if (abschlussAktiv.value) {
+            void abschlussSchliessen();
         } else {
             void verbergen();
         }

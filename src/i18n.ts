@@ -77,6 +77,8 @@ const de = {
         ohne: 'Ohne Notiz weiter',
         nichtMehr: 'Nicht mehr fragen',
         hinweis: 'Enter speichert, Umschalt+Enter neue Zeile.',
+        start: 'Start',
+        ende: 'Ende',
     },
     einstellungen: {
         titel: 'Einstellungen',
@@ -229,6 +231,8 @@ const en: Texte = {
         ohne: 'Continue without a note',
         nichtMehr: 'Do not ask again',
         hinweis: 'Enter saves, Shift+Enter adds a line.',
+        start: 'Start',
+        ende: 'End',
     },
     einstellungen: {
         titel: 'Settings',

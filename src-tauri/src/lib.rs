@@ -292,7 +292,11 @@ fn kuerzel_ausfuehren(app: &AppHandle, gedrueckt: &Shortcut) {
 
 pub fn menu_ereignis(app: &AppHandle, id: &str) {
     match id {
-        "zeigen" => fenster_zeigen(app),
+        // Fenster nach vorn holen; aus der Kompaktansicht in die volle.
+        "zeigen" => {
+            fenster_zeigen(app);
+            let _ = app.emit("gross_oeffnen", ());
+        }
         // Fenster öffnen, das Fenster wechselt in die Einstellungen.
         "einstellungen" => {
             fenster_zeigen(app);
@@ -618,12 +622,19 @@ fn trennen(app: AppHandle) -> Stand {
     stand(&app)
 }
 
-/// Notiz eines Eintrags setzen (laufend oder gerade gestoppt); ein
-/// Eintrag im Abschluss ist damit erledigt.
+/// Notiz eines Eintrags setzen (laufend oder gerade gestoppt), beim
+/// gestoppten auf Wunsch mit korrigiertem Start und Ende; ein Eintrag im
+/// Abschluss ist damit erledigt.
 #[tauri::command]
-async fn notiz_setzen(app: AppHandle, id: i64, notiz: String) -> Result<Stand, Fehler> {
+async fn notiz_setzen(
+    app: AppHandle,
+    id: i64,
+    notiz: String,
+    start: Option<String>,
+    ende: Option<String>,
+) -> Result<Stand, Fehler> {
     let notiz = Some(notiz.trim().to_string()).filter(|n| !n.is_empty());
-    api::notiz_setzen(id, notiz.clone())
+    api::notiz_setzen(id, notiz.clone(), start, ende)
         .await
         .map_err(|e| fehler_behandeln(&app, e))?;
     {

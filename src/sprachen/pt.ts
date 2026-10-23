@@ -68,6 +68,8 @@ export const pt: Texte = {
         ohne: 'Continuar sem nota',
         nichtMehr: 'Não perguntar mais',
         hinweis: 'Enter guarda, Shift+Enter nova linha.',
+        start: 'Início',
+        ende: 'Fim',
     },
     einstellungen: {
         titel: 'Definições',

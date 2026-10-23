@@ -6,6 +6,7 @@ import {
     aufFehler,
     aufEinstellungenOeffnen,
     aufGezeigt,
+    aufGrossOeffnen,
     aufMaus,
     aufStand,
     einstellungenLesen,
@@ -89,7 +90,7 @@ function kompaktSetzen(an: boolean) {
 const notizEintrag = ref<Gestoppt | null>(null);
 function notizOeffnen(e: Eintrag) {
     const sekunden = Math.floor((Date.now() - Date.parse(e.started_at)) / 1000);
-    notizEintrag.value = { id: e.id, project_id: e.project_id, activity_id: e.activity_id, note: e.note, sekunden };
+    notizEintrag.value = { id: e.id, project_id: e.project_id, activity_id: e.activity_id, note: e.note, sekunden, started_at: e.started_at, ended_at: new Date().toISOString() };
 }
 function notizFertig(neu: Stand) {
     notizEintrag.value = null;
@@ -269,6 +270,12 @@ onMounted(async () => {
     abmelden.push(await aufStand(uebernehmen));
     abmelden.push(await aufFehler(zeigeFehler));
     abmelden.push(await aufGezeigt(() => void laden()));
+    // „Fenster öffnen“ im Tray-Menü: aus der Kompaktansicht in die volle.
+    abmelden.push(
+        await aufGrossOeffnen(() => {
+            if (einstellungen.value?.kompakt) kompaktSetzen(false);
+        }),
+    );
     stand.value = await standLesen();
     await laden();
 });

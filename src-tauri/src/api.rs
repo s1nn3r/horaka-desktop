@@ -1,7 +1,7 @@
 //! Zugang zur REST-API von Horaka (https://api.horaka.com/v1). Nur die
 //! Trigger-Endpunkte: `GET /track/choices`, `GET /timer` und
 //! `POST /track/{start,stop,switch}` mit Idempotency-Key und
-//! `PATCH /track/entries/{id}` für Notiz und Start. Woher der Token
+//! `PATCH /track/entries/{id}` für Notiz, Start und Ende. Woher der Token
 //! kommt (OAuth oder Gerätetoken) und wie er erneuert wird, regelt
 //! `zugang.rs`.
 
@@ -245,14 +245,22 @@ pub async fn timer() -> Result<Timer, Fehler> {
 }
 
 /// Notiz eines eigenen Eintrags (laufend oder bis 24 Stunden nach dem
-/// Ende); `None` löscht sie.
-pub async fn notiz_setzen(id: i64, notiz: Option<String>) -> Result<Eintrag, Fehler> {
-    aufrufen(
-        reqwest::Method::PATCH,
-        &format!("track/entries/{id}"),
-        Some(serde_json::json!({ "note": notiz })),
-    )
-    .await
+/// Ende); `None` löscht sie. Dazu auf Wunsch Start und Ende (ISO 8601,
+/// das Ende nur an beendeten Einträgen).
+pub async fn notiz_setzen(
+    id: i64,
+    notiz: Option<String>,
+    start: Option<String>,
+    ende: Option<String>,
+) -> Result<Eintrag, Fehler> {
+    let mut daten = serde_json::json!({ "note": notiz });
+    if let Some(start) = start {
+        daten["started_at"] = start.into();
+    }
+    if let Some(ende) = ende {
+        daten["ended_at"] = ende.into();
+    }
+    aufrufen(reqwest::Method::PATCH, &format!("track/entries/{id}"), Some(daten)).await
 }
 
 /// Start eines eigenen Eintrags nachträglich korrigieren (`started_at`,

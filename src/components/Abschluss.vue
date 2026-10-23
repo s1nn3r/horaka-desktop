@@ -3,20 +3,24 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { abschlussUeberspringen, alsFehler, notizSetzen } from '../befehle';
 import { mit, t } from '../i18n';
 import type { Auswahl, Fehler, Gestoppt, Stand } from '../typen';
-import { dauer } from '../zeit';
+import { dauer, letzteUhrzeit, uhrzeit } from '../zeit';
 import Kopf from './Kopf.vue';
 import Vorschlaege from './Vorschlaege.vue';
 
 // Nach dem Stoppen: „Was hast du gemacht?“ für jeden gestoppten Eintrag
 // nacheinander, vorbefüllt mit der Notiz, die er schon hatte. Mit `laufend`
 // dasselbe Fenster für die Notiz eines laufenden Timers (Kontextmenü der
-// Kompaktansicht): Abbrechen statt „Ohne Notiz weiter“.
+// Kompaktansicht): Abbrechen statt „Ohne Notiz weiter“. Nach dem Stoppen
+// stehen Start und Ende darüber und lassen sich korrigieren; gesendet wird
+// nur, was sich geändert hat, der Server rundet nach den Regeln.
 const props = defineProps<{ abschluss: Gestoppt[]; auswahl: Auswahl | null; laufend?: boolean }>();
 const emit = defineEmits<{ stand: [stand: Stand]; fehler: [fehler: Fehler]; einstellungen: []; nichtMehrFragen: []; abbrechen: [] }>();
 
 const aktuell = computed(() => props.abschluss[0]);
 const anzahl = ref(props.abschluss.length);
 const text = ref('');
+const startWert = ref('');
+const endeWert = ref('');
 const speichert = ref(false);
 const feld = ref<HTMLTextAreaElement | null>(null);
 
@@ -24,8 +28,19 @@ const projekt = computed(() => props.auswahl?.projects.find((p) => p.id === aktu
 const taetigkeit = computed(() => projekt.value?.activities.find((a) => a.id === aktuell.value?.activity_id) ?? null);
 const nummer = computed(() => anzahl.value - props.abschluss.length + 1);
 
+// Ende als letztes Vorkommen bis jetzt, Start als letztes bis zum Ende:
+// über Mitternacht liegt der Start am Vortag.
+const zeiten = computed(() => {
+    const ende = letzteUhrzeit(endeWert.value, new Date());
+    const start = ende && letzteUhrzeit(startWert.value, ende);
+    return start && ende ? { start, ende } : null;
+});
+const sekunden = computed(() => (zeiten.value ? Math.round((zeiten.value.ende.getTime() - zeiten.value.start.getTime()) / 1000) : (aktuell.value?.sekunden ?? 0)));
+
 function vorbereiten() {
     text.value = aktuell.value?.note ?? '';
+    startWert.value = aktuell.value ? uhrzeit(aktuell.value.started_at) : '';
+    endeWert.value = aktuell.value ? uhrzeit(aktuell.value.ended_at) : '';
     void nextTick(() => feld.value?.focus());
 }
 
@@ -48,9 +63,25 @@ async function weiter(speichern: boolean) {
         emit('abbrechen');
         return;
     }
+    let start: string | undefined;
+    let ende: string | undefined;
+    if (!props.laufend) {
+        if (!zeiten.value) {
+            return;
+        }
+        if (startWert.value !== uhrzeit(eintrag.started_at)) start = zeiten.value.start.toISOString();
+        if (endeWert.value !== uhrzeit(eintrag.ended_at)) ende = zeiten.value.ende.toISOString();
+    }
+    // Auch „Ohne Notiz weiter“ übernimmt geänderte Zeiten, die Notiz bleibt dann.
+    const mitZeiten = start !== undefined || ende !== undefined;
     speichert.value = true;
     try {
-        emit('stand', speichern ? await notizSetzen(eintrag.id, text.value) : await abschlussUeberspringen(eintrag.id));
+        emit(
+            'stand',
+            speichern || mitZeiten
+                ? await notizSetzen(eintrag.id, speichern ? text.value : (eintrag.note ?? ''), start, ende)
+                : await abschlussUeberspringen(eintrag.id),
+        );
     } catch (e) {
         emit('fehler', alsFehler(e));
     } finally {
@@ -80,7 +111,32 @@ function taste(e: KeyboardEvent) {
                 <div class="truncate font-medium">{{ projekt?.name ?? `#${aktuell.project_id}` }}</div>
                 <div class="truncate text-[12px] text-muted-foreground">{{ [projekt?.client_name, taetigkeit?.name].filter(Boolean).join(' · ') }}</div>
             </div>
-            <span class="font-mono text-[13px] font-semibold tabular-nums">{{ laufend ? dauer(aktuell.sekunden) : mit(t.abschluss.erfasst, { dauer: dauer(aktuell.sekunden) }) }}</span>
+            <span class="font-mono text-[13px] font-semibold tabular-nums">{{ laufend ? dauer(aktuell.sekunden) : mit(t.abschluss.erfasst, { dauer: dauer(sekunden) }) }}</span>
+        </div>
+
+        <div v-if="!laufend" class="flex items-center gap-4">
+            <label class="flex items-center gap-2 text-[12px] text-muted-foreground">
+                {{ t.abschluss.start }}
+                <input
+                    v-model="startWert"
+                    type="time"
+                    required
+                    :disabled="speichert"
+                    class="h-8 rounded-md border border-border bg-background px-2 text-[13px] text-foreground tabular-nums outline-none focus:border-primary"
+                    @keydown.enter.prevent="weiter(true)"
+                />
+            </label>
+            <label class="flex items-center gap-2 text-[12px] text-muted-foreground">
+                {{ t.abschluss.ende }}
+                <input
+                    v-model="endeWert"
+                    type="time"
+                    required
+                    :disabled="speichert"
+                    class="h-8 rounded-md border border-border bg-background px-2 text-[13px] text-foreground tabular-nums outline-none focus:border-primary"
+                    @keydown.enter.prevent="weiter(true)"
+                />
+            </label>
         </div>
 
         <textarea

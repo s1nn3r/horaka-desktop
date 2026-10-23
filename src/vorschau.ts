@@ -107,6 +107,8 @@ mockIPC(
                                     activity_id: e.activity_id,
                                     note: e.note,
                                     sekunden: Math.floor((Date.now() - Date.parse(e.started_at)) / 1000),
+                                    started_at: e.started_at,
+                                    ended_at: new Date().toISOString(),
                                 })),
                         ];
                     }

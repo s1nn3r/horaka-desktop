@@ -68,6 +68,8 @@ export const es: Texte = {
         ohne: 'Continuar sin nota',
         nichtMehr: 'No volver a preguntar',
         hinweis: 'Intro guarda, Mayús+Intro añade una línea.',
+        start: 'Inicio',
+        ende: 'Fin',
     },
     einstellungen: {
         titel: 'Ajustes',

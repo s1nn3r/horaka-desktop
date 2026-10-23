@@ -68,6 +68,8 @@ export const pl: Texte = {
         ohne: 'Dalej bez notatki',
         nichtMehr: 'Nie pytaj więcej',
         hinweis: 'Enter zapisuje, Shift+Enter nowy wiersz.',
+        start: 'Początek',
+        ende: 'Koniec',
     },
     einstellungen: {
         titel: 'Ustawienia',

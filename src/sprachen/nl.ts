@@ -68,6 +68,8 @@ export const nl: Texte = {
         ohne: 'Verder zonder notitie',
         nichtMehr: 'Niet meer vragen',
         hinweis: 'Enter slaat op, Shift+Enter nieuwe regel.',
+        start: 'Start',
+        ende: 'Einde',
     },
     einstellungen: {
         titel: 'Instellingen',

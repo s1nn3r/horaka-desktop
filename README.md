@@ -27,7 +27,7 @@ The macOS build is signed ad hoc and not notarised, so Gatekeeper blocks it the 
 - Below every note field, coloured chips suggest lines from your notes on the same project and activity: the 4 most recently used and the 3 most frequently used, without duplicates. A click adds the full line at the bottom.
 - Search across client, project and activity, then favourites, recently used and all projects with their activities.
 - If parallel timers are turned on in your Horaka account, each project offers "Start in addition" and "Switch to this".
-- When you stop a timer, the window asks "What did you do?" and saves your answer as the note of the entry. This also happens after a stop from a shortcut or the tray menu, and you can turn it off.
+- When you stop a timer, the window asks "What did you do?" and saves your answer as the note of the entry. Start and end stand above it and can be corrected before you save. This also happens after a stop from a shortcut or the tray menu, and you can turn it off.
 - Right-click a row for Start, or for a running timer Stop, Add note (jumps into its note field), Correct start time and Delete. A start time is the last time of day it occurred, so 23:50 shortly after midnight means yesterday. Drag favourites to rearrange them.
 - Drag the bottom edge to make the window taller or shorter (400 to 1000 px, also with the arrow keys); it remembers the height.
 - The window opens at the icon and closes when you click elsewhere. Drag it by the header and it stays where you put it, even across restarts. If you unplug a monitor, the window moves to another screen and goes back to its own screen when the monitor returns.

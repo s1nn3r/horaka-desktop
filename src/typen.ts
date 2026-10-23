@@ -64,6 +64,9 @@ export interface Gestoppt {
     activity_id: number | null;
     note: string | null;
     sekunden: number;
+    started_at: string;
+    /** Zeitpunkt des Stoppens hier, vor der Rundung durch den Server. */
+    ended_at: string;
 }
 
 export type KuerzelAktion = 'fenster' | 'notiz' | 'stoppen' | 'umschalten' | 'wechseln';

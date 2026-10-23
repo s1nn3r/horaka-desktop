@@ -68,6 +68,8 @@ export const it: Texte = {
         ohne: 'Continua senza nota',
         nichtMehr: 'Non chiedere più',
         hinweis: 'Invio salva, Maiusc+Invio nuova riga.',
+        start: 'Inizio',
+        ende: 'Fine',
     },
     einstellungen: {
         titel: 'Impostazioni',

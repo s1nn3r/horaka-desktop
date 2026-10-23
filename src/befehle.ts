@@ -15,7 +15,8 @@ export const verbergen = () => invoke<void>('verbergen');
 export const groesseSetzen = (breite: number, hoehe: number) => invoke<void>('groesse_setzen', { breite, hoehe });
 export const appOeffnen = (pfad?: string) => invoke<void>('app_oeffnen', { pfad: pfad ?? null });
 
-export const notizSetzen = (id: number, notiz: string) => invoke<Stand>('notiz_setzen', { id, notiz });
+export const notizSetzen = (id: number, notiz: string, start?: string, ende?: string) =>
+    invoke<Stand>('notiz_setzen', { id, notiz, start: start ?? null, ende: ende ?? null });
 export const notizVorschlaege = (projekt: number, taetigkeit: number | null, notiz: string) =>
     invoke<string[]>('notiz_vorschlaege', { projekt, taetigkeit, notiz });
 export const startSetzen = (id: number, start: string) => invoke<Stand>('start_setzen', { id, start });
@@ -36,6 +37,7 @@ export const aufFehler = (fn: (fehler: Fehler) => void): Promise<UnlistenFn> => 
 export const aufNotizFokus = (fn: () => void): Promise<UnlistenFn> => listen('notiz_fokus', () => fn());
 export const aufMaus = (fn: (drueber: boolean) => void): Promise<UnlistenFn> => listen<boolean>('maus', (e) => fn(e.payload));
 export const aufEinstellungenOeffnen = (fn: () => void): Promise<UnlistenFn> => listen('einstellungen_oeffnen', () => fn());
+export const aufGrossOeffnen = (fn: () => void): Promise<UnlistenFn> => listen('gross_oeffnen', () => fn());
 export const aufGezeigt = (fn: () => void): Promise<UnlistenFn> => listen('gezeigt', () => fn());
 
 export function alsFehler(e: unknown): Fehler {

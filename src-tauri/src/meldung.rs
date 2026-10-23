@@ -18,6 +18,9 @@ pub struct Gestoppt {
     pub activity_id: Option<i64>,
     pub note: Option<String>,
     pub sekunden: i64,
+    pub started_at: String,
+    /// Zeitpunkt des Stoppens hier; der Server rundet das Ende noch.
+    pub ended_at: String,
 }
 
 fn laufende(timer: Option<&Timer>) -> &[Eintrag] {
@@ -34,6 +37,8 @@ pub fn gestoppte(vorher: Option<&Timer>, nachher: &Timer) -> Vec<Gestoppt> {
             activity_id: e.activity_id,
             note: e.note.clone(),
             sekunden: seit(&e.started_at),
+            started_at: e.started_at.clone(),
+            ended_at: chrono::Utc::now().to_rfc3339(),
         })
         .collect()
 }
@@ -158,5 +163,6 @@ mod tests {
         assert_eq!(g[0].id, 1);
         assert_eq!(g[0].note.as_deref(), Some("Notiz"));
         assert!((4979..=4981).contains(&g[0].sekunden));
+        assert_eq!(g[0].started_at, vorher.entries[0].started_at);
     }
 }

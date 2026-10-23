@@ -68,6 +68,8 @@ export const fr: Texte = {
         ohne: 'Continuer sans note',
         nichtMehr: 'Ne plus demander',
         hinweis: 'Entrée enregistre, Maj+Entrée nouvelle ligne.',
+        start: 'Début',
+        ende: 'Fin',
     },
     einstellungen: {
         titel: 'Paramètres',

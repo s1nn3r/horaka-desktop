@@ -15,7 +15,7 @@ use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 pub enum Aktion {
     /// Fenster öffnen und schließen.
     Fenster,
-    /// Fenster öffnen, Notiz des zuletzt gestarteten Timers bearbeiten.
+    /// Fenster öffnen, Notiz eines laufenden Timers bearbeiten (bei mehreren mit Auswahl).
     Notiz,
     /// Alle Timer stoppen.
     Stoppen,

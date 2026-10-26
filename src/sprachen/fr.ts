@@ -61,6 +61,7 @@ export const fr: Texte = {
     abschluss: {
         titel: 'Qu’as-tu fait ?',
         titelLaufend: 'Sur quoi travailles-tu ?',
+        welcher: 'À quel minuteur ajouter la note ?',
         erfasst: ':dauer saisi',
         von: ':nr sur :anzahl',
         platzhalter: 'En bref, enregistré comme note de la saisie',

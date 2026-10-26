@@ -61,6 +61,7 @@ export const pt: Texte = {
     abschluss: {
         titel: 'O que fizeste?',
         titelLaufend: 'Em que estás a trabalhar?',
+        welcher: 'Em que temporizador queres a nota?',
         erfasst: ':dauer registado',
         von: ':nr de :anzahl',
         platzhalter: 'Um resumo curto, fica como nota no registo',

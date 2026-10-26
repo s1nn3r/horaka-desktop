@@ -265,7 +265,7 @@ fn kuerzel_ausfuehren(app: &AppHandle, gedrueckt: &Shortcut) {
         Aktion::Fenster => fenster_umschalten(app),
         Aktion::Notiz => {
             fenster_zeigen(app);
-            let _ = app.emit("notiz_fokus", ());
+            spaeter_melden(app, "notiz_fokus");
         }
         Aktion::Stoppen => aktion_im_hintergrund(app, "stop", None, None),
         Aktion::Wechseln => aktion_im_hintergrund(app, "switch", k.projekt, k.taetigkeit),
@@ -295,12 +295,12 @@ pub fn menu_ereignis(app: &AppHandle, id: &str) {
         // Fenster nach vorn holen; aus der Kompaktansicht in die volle.
         "zeigen" => {
             fenster_zeigen(app);
-            let _ = app.emit("gross_oeffnen", ());
+            spaeter_melden(app, "gross_oeffnen");
         }
         // Fenster öffnen, das Fenster wechselt in die Einstellungen.
         "einstellungen" => {
             fenster_zeigen(app);
-            let _ = app.emit("einstellungen_oeffnen", ());
+            spaeter_melden(app, "einstellungen_oeffnen");
         }
         "app" => {
             let _ = app.opener().open_url(APP_URL, None::<&str>);
@@ -353,7 +353,18 @@ pub fn fenster_zeigen(app: &AppHandle) {
 
     let _ = w.show();
     let _ = w.set_focus();
-    let _ = app.emit("gezeigt", ());
+    spaeter_melden(app, "gezeigt");
+}
+
+/// Ereignis ans Fenster außerhalb des Menü- oder Kürzel-Handlers senden:
+/// unter Windows kam es direkt von dort nicht im Fenster an (Tray-Menü
+/// „Einstellungen“, Kürzel „Notiz“ blieben ohne Wirkung).
+fn spaeter_melden(app: &AppHandle, ereignis: &'static str) {
+    let h = app.clone();
+    tauri::async_runtime::spawn(async move {
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        let _ = h.emit(ereignis, ());
+    });
 }
 
 /// macOS: Menüleiste oben, das Fenster hängt darunter; Windows: Taskleiste

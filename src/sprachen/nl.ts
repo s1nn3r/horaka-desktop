@@ -61,6 +61,7 @@ export const nl: Texte = {
     abschluss: {
         titel: 'Wat heb je gedaan?',
         titelLaufend: 'Waar ben je mee bezig?',
+        welcher: 'Bij welke timer hoort de notitie?',
         erfasst: ':dauer geregistreerd',
         von: ':nr van :anzahl',
         platzhalter: 'Kort samengevat, komt als notitie bij de registratie',

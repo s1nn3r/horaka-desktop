@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import { alsFehler, aufGezeigt, aufNotizFokus, ausloesen, eintragVerwerfen } from '../befehle';
+import { alsFehler, aufGezeigt, ausloesen, eintragVerwerfen } from '../befehle';
 import { t } from '../i18n';
 import { kontextmenue } from '../kontext';
 import { useReihenfolge } from '../reihenfolge';
@@ -137,20 +137,13 @@ function fokus() {
     void nextTick(() => sucheFeld.value?.focus());
 }
 
-// Notizfelder der laufenden Timer; das Kürzel „Notiz“ öffnet das des
-// zuletzt gestarteten.
+// Notizfelder der laufenden Timer, geöffnet aus dem Kontextmenü.
 const notizFelder = new Map<number, InstanceType<typeof NotizFeld>>();
 function notizFeldMerken(id: number, feld: unknown) {
     if (feld) {
         notizFelder.set(id, feld as InstanceType<typeof NotizFeld>);
     } else {
         notizFelder.delete(id);
-    }
-}
-function notizOeffnen() {
-    const letzter = laufende.value[laufende.value.length - 1];
-    if (letzter) {
-        notizFelder.get(letzter.eintrag.id)?.oeffnen();
     }
 }
 
@@ -180,7 +173,6 @@ const abmelden: Array<() => void> = [];
 onMounted(async () => {
     fokus();
     abmelden.push(await aufGezeigt(fokus));
-    abmelden.push(await aufNotizFokus(() => void nextTick(notizOeffnen)));
 });
 
 onBeforeUnmount(() => abmelden.forEach((fn) => fn()));

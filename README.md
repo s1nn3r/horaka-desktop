@@ -49,7 +49,7 @@ Right-click a tile for Start, or for a running timer Stop, Add note, Correct sta
 
 ### Keyboard shortcuts
 
-Global shortcuts work while Horaka Desktop is in the background. You can assign them to these actions: open and close the window, add a note to the running timer, stop all timers, start or stop a project, and switch to a project. The default is Ctrl+Alt+H (macOS ⌃⌥H) for the window. A system notification tells you what a shortcut or a tray menu item did. If another program already holds a key combination, the settings list the ones the system refused.
+Global shortcuts work while Horaka Desktop is in the background. You can assign them to these actions: open and close the window, add a note to a running timer (with several running, pick one with the arrow keys), stop all timers, start or stop a project, and switch to a project. The default is Ctrl+Alt+H (macOS ⌃⌥H) for the window. A system notification tells you what a shortcut or a tray menu item did. If another program already holds a key combination, the settings list the ones the system refused.
 
 ### Settings
 

@@ -61,6 +61,7 @@ export const pl: Texte = {
     abschluss: {
         titel: 'Co zrobiłeś?',
         titelLaufend: 'Nad czym teraz pracujesz?',
+        welcher: 'Do którego timera dodać notatkę?',
         erfasst: 'Zarejestrowano :dauer',
         von: ':nr z :anzahl',
         platzhalter: 'Krótkie podsumowanie, trafi jako notatka do wpisu',

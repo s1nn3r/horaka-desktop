@@ -61,6 +61,7 @@ export const it: Texte = {
     abschluss: {
         titel: 'Cosa hai fatto?',
         titelLaufend: 'Su cosa stai lavorando?',
+        welcher: 'A quale timer aggiungere la nota?',
         erfasst: ':dauer registrate',
         von: ':nr di :anzahl',
         platzhalter: 'Un breve riepilogo, finisce come nota sulla registrazione',

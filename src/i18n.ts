@@ -70,6 +70,7 @@ const de = {
     abschluss: {
         titel: 'Was hast du gemacht?',
         titelLaufend: 'Was machst du gerade?',
+        welcher: 'Notiz zu welchem Timer?',
         erfasst: ':dauer erfasst',
         von: ':nr von :anzahl',
         platzhalter: 'Kurz zusammengefasst, landet als Notiz am Eintrag',
@@ -224,6 +225,7 @@ const en: Texte = {
     abschluss: {
         titel: 'What did you do?',
         titelLaufend: 'What are you working on?',
+        welcher: 'Which timer is the note for?',
         erfasst: ':dauer tracked',
         von: ':nr of :anzahl',
         platzhalter: 'A short summary, saved as the note of the entry',

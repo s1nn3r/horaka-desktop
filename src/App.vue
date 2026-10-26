@@ -7,6 +7,7 @@ import {
     aufEinstellungenOeffnen,
     aufGezeigt,
     aufGrossOeffnen,
+    aufNotizFokus,
     aufMaus,
     aufStand,
     einstellungenLesen,
@@ -22,6 +23,7 @@ import EinstellungenAnsicht from './components/Einstellungen.vue';
 import Haupt from './components/Haupt.vue';
 import Kompakt from './components/Kompakt.vue';
 import Laden from './components/Laden.vue';
+import NotizWahl from './components/NotizWahl.vue';
 import Verbinden from './components/Verbinden.vue';
 import { fehlertext, mit, t } from './i18n';
 import { themaAnwenden } from './thema';
@@ -92,6 +94,20 @@ function notizOeffnen(e: Eintrag) {
     const sekunden = Math.floor((Date.now() - Date.parse(e.started_at)) / 1000);
     notizEintrag.value = { id: e.id, project_id: e.project_id, activity_id: e.activity_id, note: e.note, sekunden, started_at: e.started_at, ended_at: new Date().toISOString() };
 }
+// Kürzel „Notiz“: ein laufender Timer gleich ins Notizfenster, mehrere zur Auswahl.
+const notizWahl = ref(false);
+function notizKuerzel() {
+    const laufende = stand.value?.verbunden ? (stand.value.timer?.entries ?? []) : [];
+    ansicht.value = 'haupt';
+    notizWahl.value = laufende.length > 1;
+    if (laufende.length === 1) {
+        notizOeffnen(laufende[0]);
+    }
+}
+function notizGewaehlt(e: Eintrag) {
+    notizWahl.value = false;
+    notizOeffnen(e);
+}
 function notizFertig(neu: Stand) {
     notizEintrag.value = null;
     uebernehmen(neu);
@@ -102,6 +118,7 @@ function notizFertig(neu: Stand) {
 const kompaktAktiv = computed(
     () =>
         !notizEintrag.value &&
+        !notizWahl.value &&
         !!einstellungen.value?.kompakt &&
         !!stand.value?.verbunden &&
         !!stand.value.auswahl &&
@@ -190,7 +207,7 @@ function spaltenSetzen(n: number) {
 // Kompaktansicht und Notizfenster (Abschluss) sind so hoch wie ihr Inhalt,
 // sonst gilt die gemerkte Höhe.
 const abschlussAktiv = computed(
-    () => !!stand.value?.verbunden && ansicht.value === 'haupt' && (!!notizEintrag.value || stand.value.abschluss.length > 0),
+    () => !!stand.value?.verbunden && ansicht.value === 'haupt' && (!!notizEintrag.value || notizWahl.value || stand.value.abschluss.length > 0),
 );
 const inhaltHoch = computed(() => kompaktAktiv.value || abschlussAktiv.value);
 const fensterBreite = computed(() => (kompaktAktiv.value ? kompaktBreite.value : BREITE));
@@ -238,8 +255,9 @@ async function aktualisieren() {
 
 function taste(e: KeyboardEvent) {
     if (e.key === 'Escape') {
-        if (notizEintrag.value) {
+        if (notizEintrag.value || notizWahl.value) {
             notizEintrag.value = null;
+            notizWahl.value = false;
         } else if (ansicht.value === 'einstellungen') {
             ansicht.value = 'haupt';
         } else if (abschlussAktiv.value) {
@@ -265,6 +283,7 @@ onMounted(async () => {
             }
         }),
     );
+    abmelden.push(await aufNotizFokus(notizKuerzel));
     einstellungen.value = await einstellungenLesen();
     themaAnwenden(einstellungen.value.thema);
     abmelden.push(await aufStand(uebernehmen));
@@ -310,6 +329,7 @@ onBeforeUnmount(() => {
                 @fehler="zeigeFehler"
                 @aendern="einstellungenAendern"
             />
+            <NotizWahl v-else-if="notizWahl" :eintraege="stand.timer?.entries ?? []" :auswahl="stand.auswahl" @waehlen="notizGewaehlt" />
             <Abschluss
                 v-else-if="notizEintrag"
                 :key="`notiz-${notizEintrag.id}`"

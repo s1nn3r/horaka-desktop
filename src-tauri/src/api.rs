@@ -260,7 +260,12 @@ pub async fn notiz_setzen(
     if let Some(ende) = ende {
         daten["ended_at"] = ende.into();
     }
-    aufrufen(reqwest::Method::PATCH, &format!("track/entries/{id}"), Some(daten)).await
+    aufrufen(
+        reqwest::Method::PATCH,
+        &format!("track/entries/{id}"),
+        Some(daten),
+    )
+    .await
 }
 
 /// Start eines eigenen Eintrags nachträglich korrigieren (`started_at`,

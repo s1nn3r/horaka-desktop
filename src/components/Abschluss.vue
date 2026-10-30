@@ -28,10 +28,12 @@ const projekt = computed(() => props.auswahl?.projects.find((p) => p.id === aktu
 const taetigkeit = computed(() => projekt.value?.activities.find((a) => a.id === aktuell.value?.activity_id) ?? null);
 const nummer = computed(() => anzahl.value - props.abschluss.length + 1);
 
-// Ende als letztes Vorkommen bis jetzt, Start als letztes bis zum Ende:
-// über Mitternacht liegt der Start am Vortag.
+// Ende als nächstes Vorkommen zum Stoppzeitpunkt (bis 12 Stunden davor oder
+// danach, ein aufgerundetes Ende darf also nach jetzt liegen), Start als
+// letztes bis zum Ende: über Mitternacht liegt der Start am Vortag.
 const zeiten = computed(() => {
-    const ende = letzteUhrzeit(endeWert.value, new Date());
+    const gestoppt = aktuell.value ? Date.parse(aktuell.value.ended_at) : Date.now();
+    const ende = letzteUhrzeit(endeWert.value, new Date(gestoppt + 12 * 3600_000));
     const start = ende && letzteUhrzeit(startWert.value, ende);
     return start && ende ? { start, ende } : null;
 });

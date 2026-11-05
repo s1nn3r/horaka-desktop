@@ -6,6 +6,8 @@ export interface Eintrag {
     activity_id: number | null;
     started_at: string;
     note: string | null;
+    /** Seit Horaka b14a; fehlt bei älteren Servern (dann Arbeit). */
+    kind?: 'work' | 'travel';
 }
 
 export interface Timer {

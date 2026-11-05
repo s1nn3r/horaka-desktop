@@ -39,6 +39,7 @@ export const pl: Texte = {
         alleStoppen: 'Zatrzymaj wszystkie',
         taetigkeiten: 'Pokaż czynności',
         ohneTaetigkeit: 'bez czynności',
+        fahrt: 'Przejazd',
         pausiert: 'wstrzymany',
         oeffnen: 'Otwórz Horaka w przeglądarce',
         einstellungen: 'Ustawienia',

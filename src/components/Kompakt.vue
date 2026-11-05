@@ -69,9 +69,9 @@ const alleKacheln = computed(() => {
         }
         gesehen.add(schluessel);
         const taetigkeit = taetigkeitVon(projekt, k.activity_id);
-        // Läuft die Kombination (ohne Tätigkeit: irgendetwas im Projekt)?
+        // Läuft die Kombination (ohne Tätigkeit: irgendetwas im Projekt, außer einer Fahrt)?
         const lauf = laufende.value.find(
-            (l) => l.eintrag.project_id === projekt.id && (taetigkeit === null || l.eintrag.activity_id === taetigkeit.id),
+            (l) => l.eintrag.kind !== 'travel' && l.eintrag.project_id === projekt.id && (taetigkeit === null || l.eintrag.activity_id === taetigkeit.id),
         );
         return [{ schluessel, projekt, taetigkeit, lauf }];
     });
@@ -152,7 +152,7 @@ function menue(lauf: Eintrag | null, projekt: number, taetigkeit: number | null)
                 :title="titel(l.projekt, l.taetigkeit)"
                 @contextmenu.prevent="menue(l.eintrag, l.eintrag.project_id, l.eintrag.activity_id)"
             >
-                <span class="min-w-0 flex-1 truncate text-[12px]">{{ l.projekt?.name ?? `#${l.eintrag.project_id}` }}</span>
+                <span class="min-w-0 flex-1 truncate text-[12px]">{{ [l.projekt?.name ?? `#${l.eintrag.project_id}`, l.eintrag.kind === 'travel' ? t.haupt.fahrt : null].filter(Boolean).join(' · ') }}</span>
                 <span class="zeit-laufend text-[12px] font-semibold tabular-nums">{{ dauer(seit(l.eintrag.started_at, jetzt)) }}</span>
                 <button
                     type="button"

@@ -39,6 +39,7 @@ export const es: Texte = {
         alleStoppen: 'Parar todos',
         taetigkeiten: 'Mostrar actividades',
         ohneTaetigkeit: 'sin actividad',
+        fahrt: 'Desplazamiento',
         pausiert: 'en pausa',
         oeffnen: 'Abrir Horaka en el navegador',
         einstellungen: 'Ajustes',

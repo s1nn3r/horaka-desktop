@@ -51,8 +51,10 @@ function paare(liste: Kombination[], ohne: Set<string> = new Set()): Paar[] {
 const laufende = computed(() =>
     (props.timer?.entries ?? []).map((e) => ({ eintrag: e, paar: paar(e.project_id, e.activity_id) })),
 );
-const laufendSchluessel = computed(() => new Set(laufende.value.map((l) => `${l.eintrag.project_id}:${l.eintrag.activity_id ?? 0}`)));
-const laufendeProjekte = computed(() => new Set(laufende.value.map((l) => l.eintrag.project_id)));
+// Eine laufende Fahrt ist nicht der Timer eines Projekts: ein Klick dort startet Arbeit.
+const arbeit = computed(() => laufende.value.filter((l) => l.eintrag.kind !== 'travel'));
+const laufendSchluessel = computed(() => new Set(arbeit.value.map((l) => `${l.eintrag.project_id}:${l.eintrag.activity_id ?? 0}`)));
+const laufendeProjekte = computed(() => new Set(arbeit.value.map((l) => l.eintrag.project_id)));
 const irgendwasLaeuft = computed(() => laufende.value.length > 0);
 
 // Favoriten in eigener Reihenfolge (Ziehen), unabhängig von Horaka und der Kompaktansicht.
@@ -200,7 +202,7 @@ onBeforeUnmount(() => abmelden.forEach((fn) => fn()));
                 <div class="min-w-0 flex-1">
                     <div class="truncate font-medium">{{ l.paar?.projekt.name ?? `#${l.eintrag.project_id}` }}</div>
                     <div class="truncate text-[12px] text-muted-foreground">
-                        {{ [l.paar?.projekt.client_name, l.paar?.taetigkeit?.name].filter(Boolean).join(' · ') }}
+                        {{ [l.paar?.projekt.client_name, l.eintrag.kind === 'travel' ? t.haupt.fahrt : l.paar?.taetigkeit?.name].filter(Boolean).join(' · ') }}
                     </div>
                 </div>
                 <span class="font-mono text-[15px] font-semibold tabular-nums">{{ dauer(seit(l.eintrag.started_at, jetzt)) }}</span>

@@ -39,6 +39,7 @@ export const nl: Texte = {
         alleStoppen: 'Alle stoppen',
         taetigkeiten: 'Activiteiten tonen',
         ohneTaetigkeit: 'zonder activiteit',
+        fahrt: 'Rit',
         pausiert: 'gepauzeerd',
         oeffnen: 'Horaka openen in de browser',
         einstellungen: 'Instellingen',

@@ -43,10 +43,10 @@ pub fn gestoppte(vorher: Option<&Timer>, nachher: &Timer) -> Vec<Gestoppt> {
         .collect()
 }
 
-fn name(auswahl: Option<&Auswahl>, e: &Eintrag) -> String {
+fn name(t: &Texte, auswahl: Option<&Auswahl>, e: &Eintrag) -> String {
     auswahl.map_or_else(
         || format!("#{}", e.project_id),
-        |a| a.bezeichnung(e.project_id, e.activity_id),
+        |a| a.eintrag_name(e, t.fahrt),
     )
 }
 
@@ -68,13 +68,13 @@ pub fn aenderung(
         .filter(|e| !nachher.entries.iter().any(|n| n.id == e.id))
         .collect();
 
-    let mit_dauer = |e: &Eintrag| format!("{} · {}", name(auswahl, e), dauer(seit(&e.started_at)));
+    let mit_dauer = |e: &Eintrag| format!("{} · {}", name(t, auswahl, e), dauer(seit(&e.started_at)));
 
     match (gestartet.is_empty(), gestoppt.is_empty()) {
         (false, false) => {
             let mut zeilen: Vec<String> = gestartet
                 .iter()
-                .map(|e| format!("▶ {}", name(auswahl, e)))
+                .map(|e| format!("▶ {}", name(t, auswahl, e)))
                 .collect();
             zeilen.extend(gestoppt.iter().map(|e| format!("■ {}", mit_dauer(e))));
             (t.gewechselt.into(), zeilen.join("\n"))
@@ -83,7 +83,7 @@ pub fn aenderung(
             t.gestartet.into(),
             gestartet
                 .iter()
-                .map(|e| name(auswahl, e))
+                .map(|e| name(t, auswahl, e))
                 .collect::<Vec<_>>()
                 .join("\n"),
         ),
@@ -122,6 +122,7 @@ mod tests {
             activity_id: None,
             started_at: (chrono::Utc::now() - chrono::Duration::minutes(83)).to_rfc3339(),
             note: Some("Notiz".into()),
+            kind: None,
         }
     }
 
@@ -152,6 +153,38 @@ mod tests {
             aenderung(t, Some(&leer), &leer, None).1,
             "Es lief kein Timer."
         );
+    }
+
+    #[test]
+    fn fahrt_heisst_fahrt() {
+        let auswahl = Auswahl {
+            projects: vec![crate::api::Projekt {
+                id: 10,
+                name: "BC".into(),
+                client_id: 1,
+                client_name: "Tacto".into(),
+                color: "#000000".into(),
+                status: "active".into(),
+                activities: vec![],
+            }],
+            favorites: vec![],
+            recent: vec![],
+            parallel_timers: false,
+        };
+        let fahrt = Eintrag {
+            kind: Some("travel".into()),
+            ..eintrag(1, 10)
+        };
+        let (_, text) = aenderung(
+            Texte::de(),
+            Some(&timer(vec![fahrt])),
+            &timer(vec![]),
+            Some(&auswahl),
+        );
+        assert_eq!(text, "Tacto · BC · Fahrt · 1:23");
+        let roh = r#"{"id":1,"project_id":10,"activity_id":null,"started_at":"x","note":null}"#;
+        let alt: Eintrag = serde_json::from_str(roh).unwrap();
+        assert!(!alt.ist_fahrt());
     }
 
     #[test]

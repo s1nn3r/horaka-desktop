@@ -43,6 +43,15 @@ pub struct Eintrag {
     pub activity_id: Option<i64>,
     pub started_at: String,
     pub note: Option<String>,
+    /// `work` oder `travel` (seit Horaka b14a); fehlt bei älteren Servern.
+    #[serde(default)]
+    pub kind: Option<String>,
+}
+
+impl Eintrag {
+    pub fn ist_fahrt(&self) -> bool {
+        self.kind.as_deref() == Some("travel")
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -101,6 +110,15 @@ impl Auswahl {
             text.push_str(&format!(" · {}", t.name));
         }
         text
+    }
+
+    /// Bezeichnung eines laufenden Eintrags; eine Fahrt hat keine Tätigkeit, sondern „Fahrt“.
+    pub fn eintrag_name(&self, e: &Eintrag, fahrt: &str) -> String {
+        if e.ist_fahrt() {
+            format!("{} · {fahrt}", self.bezeichnung(e.project_id, None))
+        } else {
+            self.bezeichnung(e.project_id, e.activity_id)
+        }
     }
 }
 

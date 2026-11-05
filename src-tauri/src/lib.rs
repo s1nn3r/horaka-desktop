@@ -280,7 +280,8 @@ fn kuerzel_ausfuehren(app: &AppHandle, gedrueckt: &Shortcut) {
                 .as_ref()
                 .is_some_and(|t| {
                     t.entries.iter().any(|e| {
-                        Some(e.project_id) == k.projekt
+                        !e.ist_fahrt()
+                            && Some(e.project_id) == k.projekt
                             && (k.taetigkeit.is_none() || e.activity_id == k.taetigkeit)
                     })
                 });

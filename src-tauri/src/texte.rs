@@ -24,6 +24,7 @@ pub struct Texte {
     pub oauth_ok_text: &'static str,
     pub oauth_fehler_titel: &'static str,
     pub oauth_fehler_text: &'static str,
+    pub fahrt: &'static str,
 }
 
 const DE: Texte = Texte {
@@ -48,6 +49,7 @@ const DE: Texte = Texte {
     oauth_ok_text: "Du kannst diesen Tab schließen und mit dem Timer weitermachen.",
     oauth_fehler_titel: "Nicht verbunden",
     oauth_fehler_text: "Die Anmeldung wurde abgebrochen. Versuch es in Horaka Desktop noch einmal.",
+    fahrt: "Fahrt",
 };
 
 const EN: Texte = Texte {
@@ -72,6 +74,7 @@ const EN: Texte = Texte {
     oauth_ok_text: "You can close this tab and carry on with the timer.",
     oauth_fehler_titel: "Not connected",
     oauth_fehler_text: "Signing in was cancelled. Try again from Horaka Desktop.",
+    fahrt: "Trip",
 };
 
 // Weitere Sprachen, erzeugt aus den Übersetzungen.
@@ -97,6 +100,7 @@ const FR: Texte = Texte {
     oauth_ok_text: "Tu peux fermer cet onglet et continuer avec le chronomètre.",
     oauth_fehler_titel: "Non connecté",
     oauth_fehler_text: "La connexion a été annulée. Réessaie dans Horaka Desktop.",
+    fahrt: "Trajet",
 };
 
 const ES: Texte = Texte {
@@ -122,6 +126,7 @@ const ES: Texte = Texte {
     oauth_fehler_titel: "No conectado",
     oauth_fehler_text:
         "Se ha cancelado el inicio de sesión. Vuelve a intentarlo desde Horaka Desktop.",
+    fahrt: "Desplazamiento",
 };
 
 const IT: Texte = Texte {
@@ -146,6 +151,7 @@ const IT: Texte = Texte {
     oauth_ok_text: "Puoi chiudere questa scheda e continuare con il timer.",
     oauth_fehler_titel: "Non collegato",
     oauth_fehler_text: "L'accesso è stato interrotto. Riprova in Horaka Desktop.",
+    fahrt: "Viaggio",
 };
 
 const NL: Texte = Texte {
@@ -170,6 +176,7 @@ const NL: Texte = Texte {
     oauth_ok_text: "Je kunt dit tabblad sluiten en verdergaan met de timer.",
     oauth_fehler_titel: "Niet verbonden",
     oauth_fehler_text: "Het inloggen is afgebroken. Probeer het opnieuw in Horaka Desktop.",
+    fahrt: "Rit",
 };
 
 const PL: Texte = Texte {
@@ -194,6 +201,7 @@ const PL: Texte = Texte {
     oauth_ok_text: "Możesz zamknąć tę kartę i wrócić do timera.",
     oauth_fehler_titel: "Niepołączono",
     oauth_fehler_text: "Logowanie zostało przerwane. Spróbuj ponownie w Horaka Desktop.",
+    fahrt: "Przejazd",
 };
 
 const PT: Texte = Texte {
@@ -218,6 +226,7 @@ const PT: Texte = Texte {
     oauth_ok_text: "Podes fechar este separador e continuar com o cronómetro.",
     oauth_fehler_titel: "Não ligado",
     oauth_fehler_text: "O início de sessão foi cancelado. Tenta outra vez no Horaka Desktop.",
+    fahrt: "Deslocação",
 };
 
 impl Texte {

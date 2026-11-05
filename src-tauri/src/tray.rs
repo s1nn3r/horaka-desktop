@@ -144,7 +144,7 @@ pub fn aktualisieren(app: &AppHandle, timer: Option<&Timer>, auswahl: Option<&Au
                 .map(|e| {
                     format!(
                         "{} ({})",
-                        auswahl.bezeichnung(e.project_id, e.activity_id),
+                        auswahl.eintrag_name(e, t.fahrt),
                         dauer(seit(&e.started_at))
                     )
                 })
@@ -211,11 +211,7 @@ fn menu_bauen(
             menu = menu.item(&eintrag(
                 app,
                 format!("stopp:{}", e.project_id),
-                mit_dauer(
-                    VOR_LAUFEND,
-                    &auswahl.bezeichnung(e.project_id, e.activity_id),
-                    e,
-                ),
+                mit_dauer(VOR_LAUFEND, &auswahl.eintrag_name(e, t.fahrt), e),
                 true,
                 zeichen(auswahl, e.project_id, Form::Stopp),
             )?);

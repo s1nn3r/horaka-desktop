@@ -68,7 +68,8 @@ pub fn aenderung(
         .filter(|e| !nachher.entries.iter().any(|n| n.id == e.id))
         .collect();
 
-    let mit_dauer = |e: &Eintrag| format!("{} · {}", name(t, auswahl, e), dauer(seit(&e.started_at)));
+    let mit_dauer =
+        |e: &Eintrag| format!("{} · {}", name(t, auswahl, e), dauer(seit(&e.started_at)));
 
     match (gestartet.is_empty(), gestoppt.is_empty()) {
         (false, false) => {
